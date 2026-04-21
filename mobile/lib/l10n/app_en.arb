@@ -1,0 +1,199 @@
+{
+  "@@locale": "en",
+  "appTitle": "DAY TO DAY",
+  "changeLanguage": "Switch language",
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "no": "No",
+  "yes": "Yes",
+  "retry": "Retry",
+  "ok": "OK",
+  "edit": "Edit",
+  "logout": "Log out",
+  "welcome": "Welcome",
+  "welcomeUserName": "Welcome, {name}",
+  "@welcomeUserName": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "startShopping": "Start shopping",
+  "shopWithPrefilledContact": "Shop with contact pre-filled",
+  "orDivider": "OR",
+  "login": "Log in",
+  "signUp": "Sign up",
+  "signUpComingSoonMessage": "Account registration will be available soon. You can use Start shopping now, or log in if you already have an account.",
+  "loginSheetTitle": "Log in",
+  "phone": "Phone",
+  "password": "Password",
+  "phoneHint": "01111989094",
+  "staffWelcomeHint": "Staff: use Sign in.",
+  "navShop": "Shop",
+  "navCart": "Cart",
+  "navOrders": "Orders",
+  "navYou": "You",
+  "couldNotLoadProducts": "Could not load products.\nCheck API URL and backend.\n{error}",
+  "@couldNotLoadProducts": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "noProductsYet": "No products yet.",
+  "shopSearchHint": "Search products",
+  "shopSearchNoResults": "No close matches. Try another spelling or a shorter word.",
+  "shopSuggestionsTitle": "Suggestions",
+  "productTitle": "Product",
+  "productMetaLine": "{price} · {weight} · Available {stock} · Max/order {max}",
+  "@productMetaLine": {
+    "placeholders": {
+      "price": {"type": "String"},
+      "weight": {"type": "String"},
+      "stock": {"type": "String"},
+      "max": {"type": "String"}
+    }
+  },
+  "premiumPoultryDescription": "Premium poultry.",
+  "quantity": "Quantity",
+  "addToCart": "Add to cart",
+  "addedToCartSnack": "Added to cart",
+  "cartTitle": "Your cart",
+  "cartEmpty": "Cart is empty",
+  "subtotal": "Subtotal",
+  "checkout": "Checkout",
+  "checkoutTitle": "Checkout",
+  "yourDetails": "Your details",
+  "fullName": "Full name",
+  "phoneNumber": "Phone number",
+  "deliveryTitle": "Delivery",
+  "addressLine1": "Address (detail)",
+  "cityDistrict": "City / district",
+  "promoOptional": "Promo code (optional)",
+  "notesOptional": "Notes (optional)",
+  "totalAmount": "Total: {amount}",
+  "@totalAmount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "errNamePhoneRequired": "Name and phone are required.",
+  "errAddressRequired": "Address and city are required for delivery.",
+  "confirmOrder": "Place order",
+  "orderPlacedTitle": "Order placed",
+  "orderThankYou": "Thank you. Order {orderNumber} — status: {status}.\n\nYou can create an account later when registration is available to save your orders and details.",
+  "@orderThankYou": {
+    "placeholders": {
+      "orderNumber": {"type": "String"},
+      "status": {"type": "String"}
+    }
+  },
+  "addressLabelHome": "Home",
+  "orderStatusPending": "Pending",
+  "orderStatusPreparing": "Preparing",
+  "orderStatusOnTheWay": "On the way",
+  "orderStatusDelivered": "Delivered",
+  "orderStatusCancelled": "Cancelled",
+  "ordersTitle": "Orders",
+  "ordersHistoryTitle": "Order history",
+  "ordersExplainer": "Orders linked to a registered account will appear here when that is enabled. Your current shopping is stored locally on this device.",
+  "lastOrderOnDevice": "Last order on this device",
+  "profileTitle": "My profile",
+  "contactSectionTitle": "Contact details",
+  "contactSectionHint": "Used at checkout and saved locally on your device.",
+  "labelName": "Name",
+  "savedSnack": "Saved",
+  "permanentAccountTitle": "Permanent account",
+  "permanentAccountHint": "When sign-up is available you can link your orders to one account. Until then, shopping and the cart stay on this device.",
+  "backToStartTitle": "Back to start?",
+  "backToStartBody": "Your cart will stay saved on this device.",
+  "backToStartButton": "Back to start screen",
+  "staffNoDashboardTitle": "DAY TO DAY",
+  "staffNoDashboardMessage": "The in-app dashboard is only available to the app administrator.",
+  "staffLogout": "Log out",
+  "adminTitleUsers": "App users",
+  "adminTitleCustomers": "Customers",
+  "adminTitleProducts": "Products",
+  "adminTitleStock": "Stock",
+  "adminNavUsers": "Users",
+  "adminNavCustomers": "Customers",
+  "adminNavProducts": "Products",
+  "adminNavStock": "Stock",
+  "adminDashboardDrawer": "Dashboard",
+  "adminLogout": "Log out",
+  "adminNewUser": "New user",
+  "adminEditUser": "Edit user",
+  "adminNewCustomer": "New customer",
+  "adminEditCustomer": "Edit customer",
+  "adminNewProduct": "New product",
+  "adminEditProduct": "Edit product",
+  "adminDeleteUserTitle": "Delete user?",
+  "adminDeleteCustomerTitle": "Delete customer?",
+  "adminDeleteProductTitle": "Delete product?",
+  "adminEnterPasswordNewUser": "Enter a password for the new user",
+  "adminEnterPasswordNewCustomer": "Enter a password for the new customer",
+  "adminDistrict": "District",
+  "adminAddressDetail": "Address detail",
+  "adminPassword": "Password",
+  "adminPasswordOptional": "Password (optional)",
+  "adminPasswordOptionalUnchanged": "Password (leave blank if unchanged)",
+  "adminRole": "Role",
+  "roleCustomer": "Customer",
+  "roleAppAdmin": "App admin",
+  "roleOpsAdmin": "Operations admin",
+  "roleAdminLegacy": "Admin (legacy)",
+  "adminProductName": "Product name (default & slug)",
+  "adminDescription": "Description (default)",
+  "adminNameEnglish": "Name — English",
+  "adminNameArabic": "Name — Arabic",
+  "adminDescriptionEnglish": "Description — English",
+  "adminDescriptionArabic": "Description — Arabic",
+  "adminPrice": "Price",
+  "adminSalePriceHint": "Sale price (optional, leave empty to remove discount)",
+  "adminWeightQty": "Weight / quantity",
+  "adminWeightUnit": "Weight unit",
+  "adminStock": "Available stock",
+  "adminMaxOrderQty": "Max quantity per order",
+  "adminCategory": "Category",
+  "adminActive": "Active",
+  "adminYes": "Yes",
+  "adminNo": "No",
+  "adminImageUrlHint": "Image URL (add multiple times)",
+  "adminAddImageUrlButton": "Add image URL",
+  "adminCheckNumbers": "Check the numbers",
+  "adminInvalidSalePrice": "Invalid sale price",
+  "adminStockUpdated": "Quantities updated",
+  "adminEnterIntegers": "Enter valid integers",
+  "adminStockDialogTitle": "Stock: {name}",
+  "@adminStockDialogTitle": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "productCardSubtitleSale": "Price: {price} · Sale: {sale} · Stock {stock}",
+  "@productCardSubtitleSale": {
+    "placeholders": {
+      "price": {"type": "String"},
+      "sale": {"type": "String"},
+      "stock": {"type": "String"}
+    }
+  },
+  "productCardSubtitle": "Price: {price} · Stock {stock}",
+  "@productCardSubtitle": {
+    "placeholders": {
+      "price": {"type": "String"},
+      "stock": {"type": "String"}
+    }
+  },
+  "adminAddUser": "Add user",
+  "adminAddCustomer": "Add customer",
+  "adminAddProduct": "Add product",
+  "adminCustomerDistrictTitle": "District",
+  "adminCustomerAddressTitle": "Address",
+  "stockCardSubtitle": "Available: {stock} · Max order: {max}",
+  "@stockCardSubtitle": {
+    "placeholders": {
+      "stock": {"type": "String"},
+      "max": {"type": "String"}
+    }
+  }
+}

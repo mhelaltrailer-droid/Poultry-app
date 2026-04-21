@@ -1,0 +1,34 @@
+---
+description: Responsive Flutter UI — spacing, breakpoints, overflow prevention (mobile/lib)
+globs: mobile/lib/**/*.dart
+alwaysApply: false
+---
+
+# Flutter UI — responsive & overflow rules
+
+When adding or editing UI under `mobile/lib/`:
+
+## Layout & overflow
+
+- Prefer `Expanded`, `Flexible`, `Wrap`, `FittedBox`, and scroll views (`ListView`, `CustomScrollView`, `SingleChildScrollView`) so content never overflows at any width.
+- Avoid `Row`/`Column` children with unbounded intrinsic width/height without flex or scroll.
+- For `ListTile` actions on variable widths, use `PopupMenuButton`, `OverflowBar`, or a custom row with `Expanded` + ellipsis instead of a tight `trailing` `Row` of multiple controls.
+
+## Sizing
+
+- Avoid raw pixel `width`/`height` except where the platform requires it (e.g. touch targets, 1px dividers, fixed thumbnail size in a list). Prefer fractions of `MediaQuery.sizeOf(context)`, `LayoutBuilder` / `SliverLayoutBuilder`, and `AspectRatio`.
+- Use `ConstrainedBox` / `BoxConstraints(maxWidth: …)` for dialogs and forms; use `dialogContentMaxWidth` from `core/responsive/responsive_layout.dart` instead of hardcoded dialog widths.
+
+## Design tokens
+
+- Use `AppSpacing` (`core/responsive/app_spacing.dart`) for padding and gaps instead of magic numbers.
+- Use `AppBreakpoints` / `context.breakpointTier` (`core/responsive/responsive_context.dart`) for adaptive layout (mobile &lt; 600, tablet 600–1024, desktop ≥ 1024).
+- For product grids, use `ResponsiveProductSliverGrid` (`widgets/responsive_sliver_grid.dart`) or `productGridCrossAxisCount` / `productGridAspectRatio` from `responsive_layout.dart`.
+
+## Navigation rail (Material 3.41+)
+
+- If `NavigationRail.extended` is `true`, set `labelType` to `null` or `NavigationRailLabelType.none` only.
+
+## New screens
+
+- Long or unknown-height content: wrap in a scroll view or use `AppScrollablePage` where a centered, max-width layout is appropriate (`core/responsive/responsive_layout.dart`).

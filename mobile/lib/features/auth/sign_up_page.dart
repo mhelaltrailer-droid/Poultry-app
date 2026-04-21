@@ -1,0 +1,321 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../core/responsive/app_spacing.dart';
+import 'auth_controller.dart';
+import 'customer_profile.dart';
+import 'customer_profile_local_service.dart';
+import '../shell/main_shell.dart';
+
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({
+    super.key,
+    this.returnToPreviousOnSave = false,
+  });
+
+  final bool returnToPreviousOnSave;
+
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  static const _fixedCity = 'Obour City';
+  static const _districts = <String>[
+    'Golf City',
+    'الحي السابع',
+    'الحي السادس',
+    'الحي الخامس',
+    'الحي الرابع',
+    'الحي الثالث',
+    'الحي الثامن',
+    'اسكان الشباب',
+    'الحي الاول',
+    'الحي الثاني',
+    'الحي التاسع',
+    'الحي الترفيهي',
+    'دار مصر',
+    'حي المجد',
+    'حي الكرامة',
+    'سكن مصر (العبور الجديدة)',
+    'جمعية احمد عرابي',
+  ];
+
+  final _formKey = GlobalKey<FormState>();
+  final _nameCtrl = TextEditingController();
+  final _familyCtrl = TextEditingController();
+  final _mobileCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  final _addressDetailsCtrl = TextEditingController();
+  final _notesCtrl = TextEditingController();
+  final _service = CustomerProfileLocalService();
+
+  String? _district;
+  bool _saving = false;
+
+  bool get _canSave {
+    final name = _nameCtrl.text.trim();
+    final mobile = _mobileCtrl.text.trim();
+    final password = _passwordCtrl.text.trim();
+    final addressDetails = _addressDetailsCtrl.text.trim();
+    final district = _district?.trim() ?? '';
+    return name.isNotEmpty &&
+        mobile.isNotEmpty &&
+        password.isNotEmpty &&
+        addressDetails.isNotEmpty &&
+        district.isNotEmpty &&
+        !_saving;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl.addListener(_refresh);
+    _mobileCtrl.addListener(_refresh);
+    _passwordCtrl.addListener(_refresh);
+    _addressDetailsCtrl.addListener(_refresh);
+    _loadExisting();
+  }
+
+  Future<void> _loadExisting() async {
+    final existing = await _service.load();
+    if (!mounted || existing == null) return;
+    setState(() {
+      _nameCtrl.text = existing.name;
+      _familyCtrl.text = existing.familyName;
+      _mobileCtrl.text = existing.mobile;
+      _addressDetailsCtrl.text = existing.addressDetails;
+      _notesCtrl.text = existing.deliveryNotes;
+      _district = existing.district.isEmpty ? null : existing.district;
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.removeListener(_refresh);
+    _mobileCtrl.removeListener(_refresh);
+    _passwordCtrl.removeListener(_refresh);
+    _addressDetailsCtrl.removeListener(_refresh);
+    _nameCtrl.dispose();
+    _familyCtrl.dispose();
+    _mobileCtrl.dispose();
+    _passwordCtrl.dispose();
+    _addressDetailsCtrl.dispose();
+    _notesCtrl.dispose();
+    super.dispose();
+  }
+
+  void _refresh() {
+    if (mounted) setState(() {});
+  }
+
+  String? _required(String? v, String label) {
+    final t = (v ?? '').trim();
+    if (t.isEmpty) return '$label is required';
+    return null;
+  }
+
+  String? _mobileValidator(String? v) {
+    final t = (v ?? '').trim();
+    if (t.isEmpty) return 'Mobile is required';
+    if (!RegExp(r'^[0-9]+$').hasMatch(t)) return 'Mobile must be numbers only';
+    if (t.length < 10 || t.length > 14) return 'Mobile length is invalid';
+    return null;
+  }
+
+  String? _passwordValidator(String? v) {
+    final t = (v ?? '').trim();
+    if (t.isEmpty) return 'Password is required';
+    if (t.length < 6) return 'Password must be at least 6 characters';
+    if (!RegExp(r'^[A-Za-z0-9]+$').hasMatch(t)) {
+      return 'Password must contain letters and/or numbers only';
+    }
+    return null;
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    final district = _district;
+    if (district == null || district.trim().isEmpty) {
+      setState(() {});
+      return;
+    }
+    setState(() => _saving = true);
+    final profile = CustomerProfile(
+      name: _nameCtrl.text.trim(),
+      familyName: _familyCtrl.text.trim(),
+      mobile: _mobileCtrl.text.trim(),
+      city: _fixedCity,
+      district: district,
+      addressDetails: _addressDetailsCtrl.text.trim(),
+      deliveryNotes: _notesCtrl.text.trim(),
+    );
+    try {
+      await context.read<AuthController>().registerCustomer(
+            name: profile.name,
+            familyName: profile.familyName,
+            phone: profile.mobile,
+            password: _passwordCtrl.text.trim(),
+            city: profile.city,
+            district: profile.district,
+            addressDetail: profile.addressDetails,
+            deliveryNotes: profile.deliveryNotes,
+          );
+      await _service.save(profile);
+      _nameCtrl.clear();
+      _familyCtrl.clear();
+      _mobileCtrl.clear();
+      _passwordCtrl.clear();
+      _addressDetailsCtrl.clear();
+      _notesCtrl.clear();
+      _district = null;
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم حفظ البيانات بنجاح')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+      return;
+    }
+    if (widget.returnToPreviousOnSave) {
+      Navigator.of(context).pop(true);
+      return;
+    }
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(builder: (_) => const MainShell()),
+      (route) => false,
+    );
+    if (mounted) setState(() => _saving = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Sign Up')),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.md,
+                      AppSpacing.md,
+                      AppSpacing.md,
+                      AppSpacing.sm,
+                    ),
+                    children: [
+                      TextFormField(
+                        controller: _nameCtrl,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(labelText: 'Name'),
+                        validator: (v) => _required(v, 'Name'),
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      TextFormField(
+                        controller: _familyCtrl,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(labelText: 'Family Name'),
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      TextFormField(
+                        controller: _mobileCtrl,
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(labelText: 'Mobile'),
+                        validator: _mobileValidator,
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      TextFormField(
+                        controller: _passwordCtrl,
+                        textInputAction: TextInputAction.next,
+                        obscureText: true,
+                        decoration: const InputDecoration(labelText: 'Password'),
+                        validator: _passwordValidator,
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      TextFormField(
+                        initialValue: _fixedCity,
+                        readOnly: true,
+                        enabled: false,
+                        decoration: const InputDecoration(labelText: 'City'),
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      DropdownButtonFormField<String>(
+                        initialValue: _district,
+                        decoration: const InputDecoration(labelText: 'District'),
+                        isExpanded: true,
+                        items: _districts
+                            .map(
+                              (d) => DropdownMenuItem<String>(
+                                value: d,
+                                child: Text(
+                                  d,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) => setState(() => _district = v),
+                        validator: (v) {
+                          if ((v ?? '').trim().isEmpty) return 'District is required';
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      TextFormField(
+                        controller: _addressDetailsCtrl,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(
+                          labelText: 'Address Details',
+                        ),
+                        validator: (v) => _required(v, 'Address Details'),
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      TextFormField(
+                        controller: _notesCtrl,
+                        maxLines: 4,
+                        decoration: const InputDecoration(
+                          labelText: 'Delivery Notes',
+                          hintText: 'اكتب أي ملاحظات للتوصيل (اختياري)',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.xs,
+                  AppSpacing.md,
+                  AppSpacing.md,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _canSave ? _save : null,
+                    child: _saving
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('حفظ'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

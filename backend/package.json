@@ -1,0 +1,31 @@
+{
+  "name": "day-to-day-api",
+  "version": "1.0.0",
+  "description": "REST API for DAY TO DAY premium poultry e-commerce",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed:admin": "node src/scripts/seedAdmin.js",
+    "seed:demo": "node src/scripts/seedDemoUsers.js",
+    "seed:catalog": "node src/scripts/seedDemoCatalog.js",
+    "seed:districts": "node src/scripts/seedDistricts.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.5.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-validator": "^7.2.0",
+    "firebase-admin": "^12.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.8.3",
+    "multer": "^1.4.5-lts.1",
+    "streamifier": "^0.1.1"
+  }
+}
