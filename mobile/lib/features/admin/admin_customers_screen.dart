@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/l10n_context.dart';
+import '../../widgets/app_skeleton.dart';
 import '../../data/api_client.dart';
 
 class AdminCustomersScreen extends StatefulWidget {
@@ -63,8 +65,15 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
               ),
               TextField(
                 controller: phoneCtrl,
-                decoration: InputDecoration(labelText: l10n.phoneNumber),
+                decoration: InputDecoration(
+                  labelText: l10n.phoneNumber,
+                  hintText: '01*********',
+                ),
                 keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(11),
+                ],
               ),
               TextField(
                 controller: districtCtrl,
@@ -180,7 +189,7 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const AdminPageSkeleton();
     if (_err != null) {
       return Center(
         child: Padding(

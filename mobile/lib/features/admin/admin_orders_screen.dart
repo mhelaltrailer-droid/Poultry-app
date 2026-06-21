@@ -5,6 +5,7 @@ import '../../core/l10n_formatters.dart';
 import '../../core/l10n_context.dart';
 import '../../core/responsive/app_breakpoints.dart';
 import '../../core/responsive/app_spacing.dart';
+import '../../widgets/app_skeleton.dart';
 import '../../data/api_client.dart';
 import '../../data/models/order.dart';
 
@@ -29,6 +30,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
   final Set<String> _statusFilters = <String>{};
   final Set<String> _districtFilters = <String>{};
+  final Set<String> _deliverySlotFilters = <String>{};
   DateTime? _dayFilter;
   bool _loading = true;
   String? _error;
@@ -116,6 +118,25 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   }
 
   Future<void> _updateStatus(Order order, String status) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm status change'),
+        content: Text('Change order ${order.orderNumber} to "$status"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
     final api = context.read<ApiClient>();
     String? cancellationReason;
     if (status == 'cancelled') {
@@ -123,12 +144,14 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
       if (cancellationReason == null || cancellationReason.trim().isEmpty) return;
     }
     try {
+      final payload = <String, dynamic>{
+        'status': status,
+        if (cancellationReason != null && cancellationReason.trim().isNotEmpty)
+          'cancellationReason': cancellationReason.trim(),
+      };
       await api.patch(
         '/api/admin/orders/${order.id}/status',
-        {
-          'status': status,
-          'cancellationReason': cancellationReason?.trim(),
-        },
+        payload,
         auth: true,
       );
       await _load();
@@ -137,6 +160,12 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
       }
     }
+  }
+
+  List<String> _allowedStatusesFor(String current) {
+    final idx = _statuses.indexOf(current);
+    if (idx < 0) return List<String>.from(_statuses);
+    return _statuses.sublist(idx);
   }
 
   Future<void> _openDetails(Order order) async {
@@ -163,6 +192,8 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                   Text('Customer: ${_customerName(data)}'),
                   const SizedBox(height: 6),
                   Text('Mobile: ${_mobile(data, addr)}'),
+                  const SizedBox(height: 6),
+                  Text('Delivery time: ${full.deliverySlotLabel ?? '-'}'),
                   const SizedBox(height: 6),
                   Text('District: ${_district(addr)}'),
                   const SizedBox(height: 6),
@@ -257,6 +288,27 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     return ['all', ...list];
   }
 
+  Map<String, String> _deliverySlotOptions() {
+    final map = <String, String>{};
+    for (final raw in _rows) {
+      final o = Order.fromJson(raw);
+      final id = (o.deliverySlotId ?? '').trim();
+      final label = (o.deliverySlotLabel ?? '').trim();
+      if (id.isNotEmpty && label.isNotEmpty) {
+        map[id] = label;
+      }
+    }
+    int startHourFromId(String id) {
+      final parts = id.split('-');
+      if (parts.isEmpty) return 999;
+      return int.tryParse(parts.first) ?? 999;
+    }
+
+    final entries = map.entries.toList()
+      ..sort((a, b) => startHourFromId(a.key).compareTo(startHourFromId(b.key)));
+    return {for (final e in entries) e.key: e.value};
+  }
+
   bool _matchesSearch(Map<String, dynamic> raw, String q) {
     if (q.isEmpty) return true;
     final o = Order.fromJson(raw);
@@ -276,6 +328,10 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
       final addr = o.deliveryAddress ?? const <String, dynamic>{};
       if (_statusFilters.isNotEmpty && !_statusFilters.contains(o.status)) return false;
       if (_districtFilters.isNotEmpty && !_districtFilters.contains(_district(addr))) return false;
+      if (_deliverySlotFilters.isNotEmpty) {
+        final slotId = (o.deliverySlotId ?? '').trim();
+        if (!_deliverySlotFilters.contains(slotId)) return false;
+      }
       if (_dayFilter != null) {
         final d = _dayFilter!;
         final sameDay = o.createdAt.year == d.year &&
@@ -395,13 +451,68 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     });
   }
 
+  Future<void> _pickDeliverySlots(Map<String, String> options) async {
+    final selected = Set<String>.from(_deliverySlotFilters);
+    final items = options.entries.toList();
+    final result = await showDialog<Set<String>>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModal) => AlertDialog(
+          title: const Text('Filter by delivery time'),
+          content: SingleChildScrollView(
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: items
+                  .map(
+                    (e) => FilterChip(
+                      label: Text(e.value),
+                      selected: selected.contains(e.key),
+                      onSelected: (v) {
+                        setModal(() {
+                          if (v) {
+                            selected.add(e.key);
+                          } else {
+                            selected.remove(e.key);
+                          }
+                        });
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                selected.clear();
+                Navigator.pop(ctx, selected);
+              },
+              child: const Text('Clear'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, selected),
+              child: const Text('Apply'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (result == null) return;
+    setState(() {
+      _deliverySlotFilters
+        ..clear()
+        ..addAll(result);
+    });
+  }
+
   int _countIn(List<Map<String, dynamic>> rows, String status) =>
       rows.where((r) => (r['status']?.toString() ?? '') == status).length;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const AdminPageSkeleton();
     if (_error != null) {
       return Center(
         child: Column(
@@ -421,6 +532,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
     final filtered = _filteredRows();
     final districtOptions = _districtOptions().where((d) => d != 'all').toList();
+    final deliverySlotOptions = _deliverySlotOptions();
     final stats = <({String label, int count})>[
       (label: 'Pending', count: _countIn(filtered, 'pending')),
       (label: 'Confirmed', count: _countIn(filtered, 'confirmed')),
@@ -483,6 +595,20 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                 ),
               ),
               SizedBox(
+                width: 230,
+                child: OutlinedButton.icon(
+                  onPressed: deliverySlotOptions.isEmpty
+                      ? null
+                      : () => _pickDeliverySlots(deliverySlotOptions),
+                  icon: const Icon(Icons.schedule_outlined),
+                  label: Text(
+                    _deliverySlotFilters.isEmpty
+                        ? 'Delivery time: All'
+                        : 'Delivery time: ${_deliverySlotFilters.length}',
+                  ),
+                ),
+              ),
+              SizedBox(
                 width: 220,
                 child: OutlinedButton.icon(
                   onPressed: () async {
@@ -503,13 +629,17 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                   ),
                 ),
               ),
-              if (_dayFilter != null || _statusFilters.isNotEmpty || _districtFilters.isNotEmpty)
+              if (_dayFilter != null ||
+                  _statusFilters.isNotEmpty ||
+                  _districtFilters.isNotEmpty ||
+                  _deliverySlotFilters.isNotEmpty)
                 TextButton(
                   onPressed: () {
                     setState(() {
                       _dayFilter = null;
                       _statusFilters.clear();
                       _districtFilters.clear();
+                      _deliverySlotFilters.clear();
                     });
                   },
                   child: const Text('Clear filters'),
@@ -541,7 +671,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${o.orderNumber}  •  ${_orderTimeLabel(o.createdAt)}',
+                      '${o.orderNumber}  •  ${o.deliverySlotLabel ?? '-'}  •  ${_orderTimeLabel(o.createdAt)}',
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 6),
@@ -556,27 +686,61 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                       children: [
                         SizedBox(
                           width: isDesktop ? 210 : 190,
-                          child: DropdownButtonFormField<String>(
-                            initialValue: _statuses.contains(o.status) ? o.status : 'pending',
-                            decoration: const InputDecoration(
-                              labelText: 'Order status',
-                              isDense: true,
-                            ),
-                            items: _statuses
-                                .map(
-                                  (s) => DropdownMenuItem(
-                                    value: s,
-                                    child: Text(
-                                      s == 'on_the_way'
-                                          ? 'On the way'
-                                          : '${s[0].toUpperCase()}${s.substring(1)}',
-                                    ),
+                          child: Builder(
+                            builder: (context) {
+                              final allowed = _allowedStatusesFor(o.status).toSet();
+                              final currentLabel = o.status == 'on_the_way'
+                                  ? 'On the way'
+                                  : '${o.status[0].toUpperCase()}${o.status.substring(1)}';
+                              return PopupMenuButton<String>(
+                                onSelected: (v) {
+                                  if (v == o.status) return;
+                                  if (!allowed.contains(v)) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Cannot move back to a previous status'),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  _updateStatus(o, v);
+                                },
+                                itemBuilder: (ctx) => _statuses
+                                    .map(
+                                      (s) => PopupMenuItem<String>(
+                                        value: s,
+                                        enabled: allowed.contains(s),
+                                        child: Text(
+                                          s == 'on_the_way'
+                                              ? (allowed.contains(s)
+                                                  ? 'On the way'
+                                                  : 'On the way (Not allowed)')
+                                              : (allowed.contains(s)
+                                                  ? '${s[0].toUpperCase()}${s.substring(1)}'
+                                                  : '${s[0].toUpperCase()}${s.substring(1)} (Not allowed)'),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                child: InputDecorator(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Order status',
+                                    isDense: true,
                                   ),
-                                )
-                                .toList(),
-                            onChanged: (v) {
-                              if (v == null || v == o.status) return;
-                              _updateStatus(o, v);
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          currentLabel,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const Icon(Icons.arrow_drop_down),
+                                    ],
+                                  ),
+                                ),
+                              );
                             },
                           ),
                         ),

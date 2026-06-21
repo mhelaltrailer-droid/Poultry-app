@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/l10n_context.dart';
+import '../../widgets/app_skeleton.dart';
 import '../../data/api_client.dart';
 
 class AdminDistrictsScreen extends StatefulWidget {
@@ -38,6 +39,17 @@ class _AdminDistrictsScreenState extends State<AdminDistrictsScreen> {
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _syncDefaults() async {
+    try {
+      await context.read<ApiClient>().post('/api/admin/districts/sync-defaults', null, auth: true);
+      await _load();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
     }
   }
 
@@ -128,20 +140,49 @@ class _AdminDistrictsScreenState extends State<AdminDistrictsScreen> {
     }
   }
 
+  Future<void> _toggleActive(Map<String, dynamic> district) async {
+    final id = district['_id']?.toString() ?? '';
+    if (id.isEmpty) return;
+    final current = district['isActive'] == true;
+    try {
+      await context.read<ApiClient>().patch(
+            '/api/admin/districts/$id',
+            {'isActive': !current},
+            auth: true,
+          );
+      await _load();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const AdminPageSkeleton();
     if (_error != null) return Center(child: Text(_error!));
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          FilledButton.icon(
-            onPressed: () => _openForm(),
-            icon: const Icon(Icons.add),
-            label: const Text('Add District'),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.icon(
+                onPressed: () => _openForm(),
+                icon: const Icon(Icons.add),
+                label: const Text('Add District'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _syncDefaults,
+                icon: const Icon(Icons.sync),
+                label: const Text('Sync Default List'),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           ..._rows.map((d) {
@@ -153,10 +194,15 @@ class _AdminDistrictsScreenState extends State<AdminDistrictsScreen> {
                 trailing: PopupMenuButton<String>(
                   onSelected: (v) {
                     if (v == 'edit') _openForm(d);
+                    if (v == 'toggle') _toggleActive(d);
                     if (v == 'delete' && id.isNotEmpty) _delete(id);
                   },
                   itemBuilder: (_) => [
                     const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                    PopupMenuItem(
+                      value: 'toggle',
+                      child: Text(d['isActive'] == true ? 'Disable' : 'Enable'),
+                    ),
                     PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
                   ],
                 ),

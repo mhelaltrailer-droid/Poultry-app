@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,7 +11,8 @@ import 'features/cart/cart_controller.dart';
 import 'features/shop/shop_repository.dart';
 import 'features/admin/admin_shell.dart';
 import 'features/shell/main_shell.dart';
-import 'features/splash/brand_splash_screen.dart';
+import 'features/splash/cinematic_splash_screen.dart';
+import 'features/splash/welcome_animation_gate.dart';
 import 'l10n/app_localizations.dart';
 
 class DayTodayApp extends StatelessWidget {
@@ -27,6 +27,7 @@ class DayTodayApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => LocaleController(initial: initialLocale),
         ),
+        ChangeNotifierProvider(create: (_) => WelcomeAnimationGate()),
         ChangeNotifierProvider(create: (_) => AuthController()),
         Provider(
           create: (ctx) {
@@ -52,7 +53,8 @@ class _SessionGate extends StatefulWidget {
 }
 
 class _SessionGateState extends State<_SessionGate> {
-  bool _ready = false;
+  bool _sessionReady = false;
+  bool _splashComplete = false;
 
   @override
   void initState() {
@@ -61,7 +63,17 @@ class _SessionGateState extends State<_SessionGate> {
       await context.read<AuthController>().loadSession();
       if (!mounted) return;
       await context.read<CartController>().restore();
-      if (mounted) setState(() => _ready = true);
+      if (!mounted) return;
+      final auth = context.read<AuthController>();
+      if (auth.isAuthenticated) {
+        context.read<WelcomeAnimationGate>().markSplashComplete();
+        setState(() {
+          _sessionReady = true;
+          _splashComplete = true;
+        });
+      } else {
+        setState(() => _sessionReady = true);
+      }
     });
   }
 
@@ -69,10 +81,22 @@ class _SessionGateState extends State<_SessionGate> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
     final locale = context.watch<LocaleController>().locale;
-    final Widget currentScreen = !_ready
-        ? const BrandSplashScreen(key: ValueKey('splash'))
+    final showSplash = !_splashComplete || !_sessionReady;
+
+    final Widget currentScreen = showSplash
+        ? CinematicSplashScreen(
+            key: const ValueKey('cinematic-splash'),
+            onComplete: () {
+              context.read<WelcomeAnimationGate>().markSplashComplete();
+              if (mounted) setState(() => _splashComplete = true);
+            },
+          )
         : !auth.isAuthenticated
-            ? const PhoneLoginPage(key: ValueKey('phone-login'))
+            ? PhoneLoginPage(
+                key: const ValueKey('phone-login'),
+                playEntranceAnimation: true,
+                afterCinematicSplash: true,
+              )
             : auth.isStaff
                 ? const AdminShell(key: ValueKey('admin-shell'))
                 : const MainShell(key: ValueKey('main-shell'));
@@ -94,16 +118,13 @@ class _SessionGateState extends State<_SessionGate> {
         );
       },
       home: AnimatedSwitcher(
-        // Fade-from-zero on the first frame often reads as "empty" on Flutter web.
-        duration: kIsWeb
-            ? Duration.zero
-            : const Duration(milliseconds: 500),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
+        duration: const Duration(milliseconds: 700),
+        switchInCurve: Curves.easeInOutCubicEmphasized,
+        switchOutCurve: Curves.easeInOutCubic,
         transitionBuilder: (child, animation) {
           final curved = CurvedAnimation(
             parent: animation,
-            curve: Curves.easeOut,
+            curve: Curves.easeInOutCubicEmphasized,
           );
           return FadeTransition(opacity: curved, child: child);
         },
@@ -113,17 +134,51 @@ class _SessionGateState extends State<_SessionGate> {
   }
 }
 
-class _LanguageToggleOverlay extends StatelessWidget {
+class _LanguageToggleOverlay extends StatefulWidget {
   const _LanguageToggleOverlay();
 
   @override
+  State<_LanguageToggleOverlay> createState() => _LanguageToggleOverlayState();
+}
+
+class _LanguageToggleOverlayState extends State<_LanguageToggleOverlay>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final gate = context.watch<WelcomeAnimationGate>();
+    if (gate.splashComplete && _ctrl?.status != AnimationStatus.completed) {
+      _ctrl?.forward();
+    }
     return Builder(
       builder: (ctx) {
         final padding = MediaQuery.paddingOf(ctx);
         final rtl = Directionality.of(ctx) == TextDirection.rtl;
         final l10n = AppLocalizations.of(ctx);
         final auth = ctx.watch<AuthController>();
+        if (!gate.splashComplete && !auth.isStaff) {
+          return const SizedBox.shrink();
+        }
+        if (!gate.splashComplete && auth.isStaff) {
+          return const SizedBox.shrink();
+        }
+        final anim = _ctrl ?? const AlwaysStoppedAnimation(1.0);
         final topOffset = auth.isStaff
             ? padding.top + kToolbarHeight + AppSpacing.xs
             : padding.top + AppSpacing.xxs;
@@ -131,25 +186,37 @@ class _LanguageToggleOverlay extends StatelessWidget {
           top: topOffset,
           right: rtl ? null : AppSpacing.xs,
           left: rtl ? AppSpacing.xs : null,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (!auth.isStaff) ...[
-                _OverlayCircleButton(
-                  semanticLabel: l10n?.appTitle ?? 'Home',
-                  icon: Icons.home_outlined,
-                  onTap: () async {
-                    await context.read<AuthController>().logout();
-                  },
-                ),
-                const SizedBox(width: AppSpacing.xs),
-              ],
-              _OverlayCircleButton(
-                semanticLabel: l10n?.changeLanguage ?? 'Language',
-                icon: Icons.language,
-                onTap: () => context.read<LocaleController>().toggleEnAr(),
+          child: FadeTransition(
+            opacity: auth.isStaff
+                ? const AlwaysStoppedAnimation(1)
+                : CurvedAnimation(parent: anim, curve: Curves.easeOut),
+            child: ScaleTransition(
+              scale: auth.isStaff
+                  ? const AlwaysStoppedAnimation(1)
+                  : Tween<double>(begin: 0.85, end: 1).animate(
+                      CurvedAnimation(parent: anim, curve: Curves.easeOutBack),
+                    ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!auth.isStaff) ...[
+                    _OverlayCircleButton(
+                      semanticLabel: l10n?.appTitle ?? 'Home',
+                      icon: Icons.home_outlined,
+                      onTap: () async {
+                        await context.read<AuthController>().logout();
+                      },
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                  ],
+                  _OverlayCircleButton(
+                    semanticLabel: l10n?.changeLanguage ?? 'Language',
+                    icon: Icons.language,
+                    onTap: () => context.read<LocaleController>().toggleEnAr(),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },

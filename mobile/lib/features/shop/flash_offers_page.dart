@@ -6,6 +6,7 @@ import '../../core/app_theme.dart';
 import '../../core/l10n_context.dart';
 import '../../core/responsive/app_spacing.dart';
 import '../../data/models/flash_offer.dart';
+import '../../widgets/app_skeleton.dart';
 import 'shop_repository.dart';
 
 class FlashOffersPage extends StatefulWidget {
@@ -60,7 +61,7 @@ class _FlashOffersPageState extends State<FlashOffersPage> {
           future: _future,
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const FlashOffersListSkeleton();
             }
             if (snap.hasError) {
               return ListView(

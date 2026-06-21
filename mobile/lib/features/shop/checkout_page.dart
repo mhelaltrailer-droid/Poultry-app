@@ -25,17 +25,87 @@ class _CheckoutPageState extends State<CheckoutPage> {
   bool _busy = false;
   String? _error;
   CustomerProfile? _profile;
+  bool _slotsLoading = true;
+  List<DeliverySlot> _slots = [];
+  String? _selectedSlotId;
 
   @override
   void initState() {
     super.initState();
     _loadProfile();
+    _loadDeliverySlots();
+  }
+
+  Future<void> _loadDeliverySlots() async {
+    setState(() {
+      _slotsLoading = true;
+      _error = null;
+    });
+    try {
+      final repo = context.read<ShopRepository>();
+      final slots = await repo.fetchDeliverySlots();
+      final visible = slots.where((s) => s.isVisible).toList()
+        ..sort((a, b) => a.fromHour.compareTo(b.fromHour));
+      String? selected;
+      final nowHour = DateTime.now().hour;
+      for (final s in visible) {
+        if (s.fromHour == nowHour && !s.isFull) {
+          selected = s.id;
+          break;
+        }
+      }
+      if (selected == null) {
+        for (final s in visible) {
+          if (!s.isFull) {
+            selected = s.id;
+            break;
+          }
+        }
+      }
+      if (!mounted) return;
+      setState(() {
+        _slots = visible;
+        _selectedSlotId = selected;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _slotsLoading = false);
+    }
   }
 
   Future<void> _loadProfile() async {
     final p = await _profileService.load();
     if (!mounted) return;
-    setState(() => _profile = p);
+    if (p != null) {
+      setState(() => _profile = p);
+      return;
+    }
+
+    final auth = context.read<AuthController>();
+    final hasAuthProfileBasics = auth.guestName.trim().isNotEmpty &&
+        auth.guestPhone.trim().isNotEmpty &&
+        auth.guestDistrict.trim().isNotEmpty &&
+        auth.guestAddressDetail.trim().isNotEmpty;
+
+    if (!hasAuthProfileBasics) {
+      setState(() => _profile = null);
+      return;
+    }
+
+    final fallback = CustomerProfile(
+      name: auth.guestName.trim(),
+      familyName: '',
+      mobile: auth.guestPhone.trim(),
+      city: 'Obour City',
+      district: auth.guestDistrict.trim(),
+      addressDetails: auth.guestAddressDetail.trim(),
+      deliveryNotes: '',
+    );
+    await _profileService.save(fallback);
+    if (!mounted) return;
+    setState(() => _profile = fallback);
   }
 
   @override
@@ -53,6 +123,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
     if (profile.addressDetails.trim().isEmpty || profile.district.trim().isEmpty) {
       setState(() => _error = l10n.errAddressRequired);
+      return;
+    }
+    if (_selectedSlotId == null || _selectedSlotId!.isEmpty) {
+      setState(() => _error = 'Please choose an available delivery time');
       return;
     }
     setState(() {
@@ -86,6 +160,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         deliveryFee: _deliveryFee,
         notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
         locale: localeCode,
+        deliverySlotId: _selectedSlotId,
       );
       cart.clear();
       if (!mounted) return;
@@ -128,6 +203,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     final profile = _profile;
     final subtotal = cart.subtotal;
     final total = subtotal + _deliveryFee;
+    final hasAvailableSlots = _slots.any((s) => !s.isFull);
 
     return Scaffold(
       appBar: AppBar(
@@ -228,6 +304,50 @@ class _CheckoutPageState extends State<CheckoutPage> {
           ),
           SizedBox(height: AppSpacing.md),
           Text(
+            'اختر ميعاد التوصيل',
+            style: GoogleFonts.montserrat(fontWeight: FontWeight.w700),
+          ),
+          SizedBox(height: AppSpacing.xs),
+          if (_slotsLoading)
+            const LinearProgressIndicator()
+          else if (_slots.isEmpty)
+            const Text(
+              'لا توجد مواعيد توصيل متاحة حالياً',
+              style: TextStyle(color: Colors.red),
+            )
+          else
+            DropdownButtonFormField<String>(
+              value: _selectedSlotId,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              items: _slots
+                  .map(
+                    (slot) => DropdownMenuItem<String>(
+                      value: slot.id,
+                      enabled: !slot.isFull,
+                      child: Text(
+                        slot.isFull
+                            ? '${slot.label} (Full Capacity)'
+                            : slot.label,
+                      ),
+                    ),
+                  )
+                  .toList(),
+              onChanged: _busy
+                  ? null
+                  : (value) {
+                      final selected = _slots.firstWhere(
+                        (s) => s.id == value,
+                        orElse: () => _slots.first,
+                      );
+                      if (selected.isFull) return;
+                      setState(() => _selectedSlotId = value);
+                    },
+            ),
+          SizedBox(height: AppSpacing.md),
+          Text(
             'Delivery fees: ${_deliveryFee.toStringAsFixed(2)}',
             style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
           ),
@@ -242,7 +362,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
           ],
           SizedBox(height: AppSpacing.xl),
           FilledButton(
-            onPressed: _busy || profile == null || cart.lines.isEmpty ? null : _submit,
+            onPressed: _busy ||
+                    profile == null ||
+                    cart.lines.isEmpty ||
+                    _slotsLoading ||
+                    !hasAvailableSlots ||
+                    _selectedSlotId == null
+                ? null
+                : _submit,
             child: _busy
                 ? const SizedBox(
                     height: 22,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/responsive/app_spacing.dart';
+import '../../data/api_client.dart';
 import 'auth_controller.dart';
 import 'customer_profile.dart';
 import 'customer_profile_local_service.dart';
@@ -21,7 +23,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   static const _fixedCity = 'Obour City';
-  static const _districts = <String>[
+  static const _fallbackDistricts = <String>[
     'Golf City',
     'الحي السابع',
     'الحي السادس',
@@ -52,6 +54,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   String? _district;
   bool _saving = false;
+  bool _districtsLoading = true;
+  List<String> _districts = [];
 
   bool get _canSave {
     final name = _nameCtrl.text.trim();
@@ -75,6 +79,28 @@ class _SignUpPageState extends State<SignUpPage> {
     _passwordCtrl.addListener(_refresh);
     _addressDetailsCtrl.addListener(_refresh);
     _loadExisting();
+    _loadDistricts();
+  }
+
+  Future<void> _loadDistricts() async {
+    try {
+      final data = await context.read<ApiClient>().get('/api/districts') as List<dynamic>;
+      final districts = data
+          .map((e) => (e as Map)['name']?.toString().trim() ?? '')
+          .where((name) => name.isNotEmpty)
+          .toList();
+      if (!mounted) return;
+      setState(() {
+        _districts = districts.isEmpty ? List<String>.from(_fallbackDistricts) : districts;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _districts = List<String>.from(_fallbackDistricts);
+      });
+    } finally {
+      if (mounted) setState(() => _districtsLoading = false);
+    }
   }
 
   Future<void> _loadExisting() async {
@@ -119,7 +145,9 @@ class _SignUpPageState extends State<SignUpPage> {
     final t = (v ?? '').trim();
     if (t.isEmpty) return 'Mobile is required';
     if (!RegExp(r'^[0-9]+$').hasMatch(t)) return 'Mobile must be numbers only';
-    if (t.length < 10 || t.length > 14) return 'Mobile length is invalid';
+    if (!RegExp(r'^01\d{9}$').hasMatch(t)) {
+      return 'Mobile must start with 01 and be exactly 11 digits';
+    }
     return null;
   }
 
@@ -229,7 +257,14 @@ class _SignUpPageState extends State<SignUpPage> {
                         controller: _mobileCtrl,
                         textInputAction: TextInputAction.next,
                         keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(labelText: 'Mobile'),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(11),
+                        ],
+                        decoration: const InputDecoration(
+                          labelText: 'Mobile',
+                          hintText: '01*********',
+                        ),
                         validator: _mobileValidator,
                       ),
                       SizedBox(height: AppSpacing.sm),
@@ -252,6 +287,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         initialValue: _district,
                         decoration: const InputDecoration(labelText: 'District'),
                         isExpanded: true,
+                        hint: _districtsLoading ? const Text('Loading...') : null,
                         items: _districts
                             .map(
                               (d) => DropdownMenuItem<String>(
@@ -263,7 +299,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                             )
                             .toList(),
-                        onChanged: (v) => setState(() => _district = v),
+                        onChanged: _districtsLoading ? null : (v) => setState(() => _district = v),
                         validator: (v) {
                           if ((v ?? '').trim().isEmpty) return 'District is required';
                           return null;

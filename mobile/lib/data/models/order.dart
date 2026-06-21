@@ -47,6 +47,8 @@ class Order {
     required this.createdAt,
     this.assignedDelivery,
     this.deliveryAddress,
+    this.deliverySlotLabel,
+    this.deliverySlotId,
   });
 
   final String id;
@@ -60,6 +62,8 @@ class Order {
   final DateTime createdAt;
   final String? assignedDelivery;
   final Map<String, dynamic>? deliveryAddress;
+  final String? deliverySlotLabel;
+  final String? deliverySlotId;
 
   factory Order.fromJson(Map<String, dynamic> j) {
     final itemsRaw = j['items'] as List<dynamic>? ?? [];
@@ -77,6 +81,12 @@ class Order {
       createdAt: DateTime.parse(j['createdAt'] as String),
       assignedDelivery: j['assignedDelivery'] as String?,
       deliveryAddress: j['deliveryAddress'] as Map<String, dynamic>?,
+      deliverySlotLabel: (j['deliverySlot'] is Map)
+          ? (j['deliverySlot']['label'] as String?)
+          : null,
+      deliverySlotId: (j['deliverySlot'] is Map)
+          ? (j['deliverySlot']['id'] as String?)
+          : null,
     );
   }
 

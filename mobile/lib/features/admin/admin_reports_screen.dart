@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/responsive/app_spacing.dart';
+import '../../widgets/app_skeleton.dart';
 import '../../data/api_client.dart';
 
 class AdminReportsScreen extends StatefulWidget {
@@ -245,7 +246,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
         const SizedBox(height: AppSpacing.sm),
         Expanded(
           child: _loading
-              ? const Center(child: CircularProgressIndicator())
+              ? const AdminPageSkeleton()
               : _error != null
                   ? Center(child: Text(_error!, textAlign: TextAlign.center))
                   : ListView(

@@ -56,6 +56,7 @@ class ShopRepository {
     double deliveryFee = 0,
     String? promoCode,
     String? notes,
+    String? deliverySlotId,
   }) async {
     final data = await _api.post(
       '/api/orders',
@@ -65,6 +66,8 @@ class ShopRepository {
         'deliveryFee': deliveryFee,
         if (promoCode != null && promoCode.isNotEmpty) 'promoCode': promoCode,
         if (notes != null && notes.isNotEmpty) 'notes': notes,
+        if (deliverySlotId != null && deliverySlotId.isNotEmpty)
+          'deliverySlotId': deliverySlotId,
       },
       auth: true,
     ) as Map<String, dynamic>;
@@ -81,6 +84,7 @@ class ShopRepository {
     String? promoCode,
     String? notes,
     String locale = 'en',
+    String? deliverySlotId,
   }) async {
     final data = await _api.post(
       '/api/orders/guest',
@@ -93,10 +97,19 @@ class ShopRepository {
         if (promoCode != null && promoCode.isNotEmpty) 'promoCode': promoCode,
         if (notes != null && notes.isNotEmpty) 'notes': notes,
         'locale': locale.startsWith('ar') ? 'ar' : 'en',
+        if (deliverySlotId != null && deliverySlotId.isNotEmpty)
+          'deliverySlotId': deliverySlotId,
       },
       auth: false,
     ) as Map<String, dynamic>;
     return Order.fromJson(data);
+  }
+
+  Future<List<DeliverySlot>> fetchDeliverySlots() async {
+    final data = await _api.get('/api/orders/delivery-slots') as List<dynamic>;
+    return data
+        .map((e) => DeliverySlot.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
   }
 
   /// Call after Firebase Messaging provides a token (see `docs/fcm_setup.md`).
@@ -279,4 +292,39 @@ class ShopRepository {
       ),
     ];
   }
+}
+
+class DeliverySlot {
+  DeliverySlot({
+    required this.id,
+    required this.fromHour,
+    required this.toHour,
+    required this.label,
+    required this.capacity,
+    required this.used,
+    required this.isFull,
+    required this.isVisible,
+  });
+
+  factory DeliverySlot.fromJson(Map<String, dynamic> json) {
+    return DeliverySlot(
+      id: json['id']?.toString() ?? '',
+      fromHour: (json['fromHour'] as num?)?.toInt() ?? 0,
+      toHour: (json['toHour'] as num?)?.toInt() ?? 0,
+      label: json['label']?.toString() ?? '',
+      capacity: (json['capacity'] as num?)?.toInt() ?? 0,
+      used: (json['used'] as num?)?.toInt() ?? 0,
+      isFull: json['isFull'] == true,
+      isVisible: json['isVisible'] == true,
+    );
+  }
+
+  final String id;
+  final int fromHour;
+  final int toHour;
+  final String label;
+  final int capacity;
+  final int used;
+  final bool isFull;
+  final bool isVisible;
 }

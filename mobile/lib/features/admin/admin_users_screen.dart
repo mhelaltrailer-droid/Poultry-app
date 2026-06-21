@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/l10n_context.dart';
 import '../../core/l10n_formatters.dart';
+import '../../widgets/app_skeleton.dart';
 import '../../data/api_client.dart';
 
 const _roleKeys = ['customer', 'app_admin', 'ops_admin', 'admin'];
@@ -15,7 +17,7 @@ class AdminUsersScreen extends StatefulWidget {
 }
 
 class _AdminUsersScreenState extends State<AdminUsersScreen> {
-  static const _districts = <String>[
+  static const _fallbackDistricts = <String>[
     'Golf City',
     'الحي السابع',
     'الحي السادس',
@@ -37,6 +39,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   static const _fixedCity = 'Obour City';
 
   List<dynamic> _rows = [];
+  List<String> _districts = List<String>.from(_fallbackDistricts);
   String? _err;
   bool _loading = true;
 
@@ -54,6 +57,16 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     try {
       final api = context.read<ApiClient>();
       final data = await api.get('/api/admin/users', auth: true);
+      final districtsData = await api.get('/api/districts');
+      if (districtsData is List) {
+        final loadedDistricts = districtsData
+            .map((e) => (e as Map)['name']?.toString().trim() ?? '')
+            .where((name) => name.isNotEmpty)
+            .toList();
+        if (loadedDistricts.isNotEmpty) {
+          _districts = loadedDistricts;
+        }
+      }
       if (data is List) {
         setState(() => _rows = data);
       }
@@ -115,8 +128,15 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   ),
                   TextField(
                     controller: phoneCtrl,
-                    decoration: InputDecoration(labelText: l10n.phoneNumber),
+                    decoration: InputDecoration(
+                      labelText: l10n.phoneNumber,
+                      hintText: '01*********',
+                    ),
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(11),
+                    ],
                   ),
                   TextField(
                     controller: passCtrl,
@@ -160,8 +180,15 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   ),
                   TextField(
                     controller: phoneCtrl,
-                    decoration: InputDecoration(labelText: l10n.phoneNumber),
+                    decoration: InputDecoration(
+                      labelText: l10n.phoneNumber,
+                      hintText: '01*********',
+                    ),
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(11),
+                    ],
                   ),
                   TextField(
                     controller: passCtrl,
@@ -280,7 +307,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const AdminPageSkeleton();
     if (_err != null) {
       return Center(
         child: Padding(

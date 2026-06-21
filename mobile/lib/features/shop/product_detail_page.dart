@@ -7,6 +7,7 @@ import '../../core/l10n_context.dart';
 import '../../core/responsive/app_spacing.dart';
 import '../../core/responsive/app_text_scale.dart';
 import '../../data/models/product.dart';
+import '../../widgets/app_skeleton.dart';
 import '../cart/cart_controller.dart';
 import '../cart/cart_model.dart';
 import 'shop_repository.dart';
@@ -65,8 +66,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       body: FutureBuilder<Product>(
         future: _future,
         builder: (context, snap) {
+          if (snap.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Text(
+                  snap.error.toString(),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          }
           if (!snap.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const DetailPageSkeleton();
           }
           final p = snap.data!;
           final titleSize = AppTextScale.fontSize(context, 26);

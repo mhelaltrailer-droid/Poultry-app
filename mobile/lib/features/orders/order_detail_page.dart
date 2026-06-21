@@ -6,6 +6,7 @@ import '../../core/app_theme.dart';
 import '../../core/responsive/app_spacing.dart';
 import '../../core/responsive/app_text_scale.dart';
 import '../../data/models/order.dart';
+import '../../widgets/app_skeleton.dart';
 import '../shop/shop_repository.dart';
 
 class OrderDetailPage extends StatefulWidget {
@@ -43,8 +44,16 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       body: FutureBuilder<Order>(
         future: _future,
         builder: (context, snap) {
+          if (snap.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Text(snap.error.toString(), textAlign: TextAlign.center),
+              ),
+            );
+          }
           if (!snap.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const DetailPageSkeleton();
           }
           final o = snap.data!;
           return ListView(

@@ -11,6 +11,7 @@ import '../auth/auth_controller.dart';
 import '../../data/models/flash_offer.dart';
 import '../../data/models/product.dart';
 import '../../widgets/responsive_sliver_grid.dart';
+import '../../widgets/app_skeleton.dart';
 import 'flash_offers_page.dart';
 import 'product_detail_page.dart';
 import 'shop_repository.dart';
@@ -287,7 +288,7 @@ class _ShopHomePageState extends State<ShopHomePage> {
               future: _future,
               builder: (context, snap) {
                 if (snap.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const ShopProductGridSkeleton();
                 }
                 if (snap.hasError) {
                   return Center(

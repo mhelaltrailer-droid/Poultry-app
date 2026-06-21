@@ -6,6 +6,7 @@ import '../../core/l10n_context.dart';
 import '../../core/responsive/app_breakpoints.dart';
 import '../auth/auth_controller.dart';
 import 'admin_flash_offers_screen.dart';
+import 'admin_capacity_control_screen.dart';
 import 'admin_customers_screen.dart';
 import 'admin_districts_screen.dart';
 import 'admin_orders_screen.dart';
@@ -23,11 +24,6 @@ class AdminShell extends StatefulWidget {
 
 class _AdminShellState extends State<AdminShell> {
   int _index = 0;
-
-  void _stepBack() {
-    if (_index <= 0) return;
-    setState(() => _index = _index - 1);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +44,7 @@ class _AdminShellState extends State<AdminShell> {
       'Districts',
       'Flash Offers',
       'Reports',
+      'Capacity Control',
     ];
     final pages = [
       const AdminOrdersScreen(),
@@ -58,6 +55,7 @@ class _AdminShellState extends State<AdminShell> {
       const AdminDistrictsScreen(),
       const AdminFlashOffersScreen(),
       const AdminReportsScreen(),
+      const AdminCapacityControlScreen(),
     ];
 
     return LayoutBuilder(
@@ -114,6 +112,11 @@ class _AdminShellState extends State<AdminShell> {
               selectedIcon: Icon(Icons.bar_chart),
               label: Text('Reports'),
             ),
+            const NavigationRailDestination(
+              icon: Icon(Icons.schedule_outlined),
+              selectedIcon: Icon(Icons.schedule),
+              label: Text('Capacity Control'),
+            ),
           ],
         );
 
@@ -122,12 +125,6 @@ class _AdminShellState extends State<AdminShell> {
         if (wide) {
           return Scaffold(
             appBar: AppBar(
-              leading: _index > 0
-                  ? IconButton(
-                      onPressed: _stepBack,
-                      icon: const Icon(Icons.arrow_back),
-                    )
-                  : null,
               title: Text(titles[_index]),
               actions: [
                 Padding(
@@ -159,12 +156,6 @@ class _AdminShellState extends State<AdminShell> {
 
         return Scaffold(
           appBar: AppBar(
-            leading: _index > 0
-                ? IconButton(
-                    onPressed: _stepBack,
-                    icon: const Icon(Icons.arrow_back),
-                  )
-                : null,
             title: Text(titles[_index]),
             actions: [
               TextButton(

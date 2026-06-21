@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/l10n_context.dart';
+import '../../widgets/app_skeleton.dart';
 import '../../data/api_client.dart';
 
 class AdminStockScreen extends StatefulWidget {
@@ -115,7 +116,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const AdminPageSkeleton();
     if (_err != null) {
       return Center(
         child: Padding(

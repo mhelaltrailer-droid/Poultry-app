@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/app_theme.dart';
 import '../../core/l10n_context.dart';
 import '../../core/responsive/app_spacing.dart';
+import '../auth/auth_controller.dart';
 import '../auth/customer_profile_local_service.dart';
 import '../auth/sign_up_page.dart';
 import '../cart/cart_controller.dart';
@@ -14,8 +15,13 @@ class CartPage extends StatelessWidget {
   const CartPage({super.key});
 
   Future<void> _goToCheckout(BuildContext context) async {
+    final auth = context.read<AuthController>();
     final profile = await CustomerProfileLocalService().load();
-    if (profile == null) {
+    final hasAuthProfileBasics = auth.guestName.trim().isNotEmpty &&
+        auth.guestPhone.trim().isNotEmpty &&
+        auth.guestDistrict.trim().isNotEmpty &&
+        auth.guestAddressDetail.trim().isNotEmpty;
+    if (profile == null && !hasAuthProfileBasics) {
       final saved = await Navigator.of(context).push<bool>(
         MaterialPageRoute<bool>(
           builder: (_) => const SignUpPage(returnToPreviousOnSave: true),

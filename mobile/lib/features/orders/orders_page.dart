@@ -7,6 +7,7 @@ import '../../core/l10n_context.dart';
 import '../../core/responsive/app_spacing.dart';
 import '../../core/l10n_formatters.dart';
 import '../../data/models/order.dart';
+import '../../widgets/app_skeleton.dart';
 import '../auth/auth_controller.dart';
 import '../auth/customer_profile_local_service.dart';
 import '../shop/shop_repository.dart';
@@ -83,7 +84,7 @@ class _OrdersPageState extends State<OrdersPage> {
               ),
               SizedBox(height: AppSpacing.md),
               if (snapshot.connectionState == ConnectionState.waiting)
-                const Center(child: CircularProgressIndicator())
+                const OrderCardSkeletonList()
               else if (snapshot.hasError)
                 Text(
                   snapshot.error.toString(),
