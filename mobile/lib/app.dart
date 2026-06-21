@@ -64,16 +64,7 @@ class _SessionGateState extends State<_SessionGate> {
       if (!mounted) return;
       await context.read<CartController>().restore();
       if (!mounted) return;
-      final auth = context.read<AuthController>();
-      if (auth.isAuthenticated) {
-        context.read<WelcomeAnimationGate>().markSplashComplete();
-        setState(() {
-          _sessionReady = true;
-          _splashComplete = true;
-        });
-      } else {
-        setState(() => _sessionReady = true);
-      }
+      setState(() => _sessionReady = true);
     });
   }
 
