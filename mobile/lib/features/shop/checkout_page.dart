@@ -28,6 +28,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
   bool _slotsLoading = true;
   List<DeliverySlot> _slots = [];
   String? _selectedSlotId;
+  String? _selectedPhoneId;
+  String? _selectedAddressId;
 
   @override
   void initState() {
@@ -79,7 +81,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
     final p = await _profileService.load();
     if (!mounted) return;
     if (p != null) {
-      setState(() => _profile = p);
+      setState(() {
+        _profile = p;
+        _selectedPhoneId = p.defaultPhone.id;
+        _selectedAddressId = p.defaultAddress.id;
+      });
       return;
     }
 
@@ -102,16 +108,59 @@ class _CheckoutPageState extends State<CheckoutPage> {
       district: auth.guestDistrict.trim(),
       addressDetails: auth.guestAddressDetail.trim(),
       deliveryNotes: '',
+      phones: auth.guestPhone.trim().isEmpty
+          ? []
+          : [
+              SavedPhone(
+                id: SavedPhone.newId(),
+                label: 'Mobile',
+                number: auth.guestPhone.trim(),
+                isDefault: true,
+              ),
+            ],
+      addresses: auth.guestDistrict.trim().isEmpty &&
+              auth.guestAddressDetail.trim().isEmpty
+          ? []
+          : [
+              SavedAddress(
+                id: SavedAddress.newId(),
+                label: 'Home',
+                city: 'Obour City',
+                district: auth.guestDistrict.trim(),
+                addressDetails: auth.guestAddressDetail.trim(),
+                isDefault: true,
+              ),
+            ],
     );
     await _profileService.save(fallback);
     if (!mounted) return;
-    setState(() => _profile = fallback);
+    setState(() {
+      _profile = fallback;
+      _selectedPhoneId = fallback.defaultPhone.id;
+      _selectedAddressId = fallback.defaultAddress.id;
+    });
   }
 
   @override
   void dispose() {
     _notes.dispose();
     super.dispose();
+  }
+
+  SavedPhone? _selectedPhone(CustomerProfile profile) {
+    if (profile.phones.isEmpty) return profile.defaultPhone;
+    return profile.phones.firstWhere(
+      (p) => p.id == _selectedPhoneId,
+      orElse: () => profile.defaultPhone,
+    );
+  }
+
+  SavedAddress? _selectedAddress(CustomerProfile profile) {
+    if (profile.addresses.isEmpty) return profile.defaultAddress;
+    return profile.addresses.firstWhere(
+      (a) => a.id == _selectedAddressId,
+      orElse: () => profile.defaultAddress,
+    );
   }
 
   Future<void> _submit() async {
@@ -121,7 +170,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
       setState(() => _error = l10n.errNamePhoneRequired);
       return;
     }
-    if (profile.addressDetails.trim().isEmpty || profile.district.trim().isEmpty) {
+    final phone = _selectedPhone(profile);
+    final address = _selectedAddress(profile);
+    if (phone == null || phone.number.trim().isEmpty) {
+      setState(() => _error = l10n.errNamePhoneRequired);
+      return;
+    }
+    if (address == null ||
+        address.addressDetails.trim().isEmpty ||
+        address.district.trim().isEmpty) {
       setState(() => _error = l10n.errAddressRequired);
       return;
     }
@@ -146,22 +203,37 @@ class _CheckoutPageState extends State<CheckoutPage> {
         )
         .toList();
     try {
-      await auth.setGuestContact(name: profile.name, phone: profile.mobile);
-      final order = await repo.placeGuestOrder(
-        items: items,
-        guestName: profile.name,
-        guestPhone: profile.mobile,
-        deliveryAddress: {
-          'line1': profile.addressDetails,
-          'city': profile.district,
-          'phone': profile.mobile,
-          'label': l10n.addressLabelHome,
-        },
-        deliveryFee: _deliveryFee,
-        notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
-        locale: localeCode,
-        deliverySlotId: _selectedSlotId,
+      await auth.setGuestContact(
+        name: profile.name,
+        phone: phone.number,
+        district: address.district,
+        addressDetail: address.addressDetails,
       );
+      final deliveryAddress = {
+        'line1': address.addressDetails,
+        'city': address.city,
+        'region': address.district,
+        'phone': phone.number,
+        'label': address.label,
+      };
+      final order = auth.isCustomerLoggedIn
+          ? await repo.placeOrder(
+              items: items,
+              deliveryAddress: deliveryAddress,
+              deliveryFee: _deliveryFee,
+              notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+              deliverySlotId: _selectedSlotId,
+            )
+          : await repo.placeGuestOrder(
+              items: items,
+              guestName: profile.name,
+              guestPhone: phone.number,
+              deliveryAddress: deliveryAddress,
+              deliveryFee: _deliveryFee,
+              notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+              locale: localeCode,
+              deliverySlotId: _selectedSlotId,
+            );
       cart.clear();
       if (!mounted) return;
       await showDialog<void>(
@@ -223,10 +295,41 @@ class _CheckoutPageState extends State<CheckoutPage> {
           SizedBox(height: AppSpacing.sm),
           if (profile == null)
             Text(
-              'No profile data found. Please complete Sign Up first.',
+              l10n.profileEmptyCheckoutHint,
               style: const TextStyle(color: Colors.red),
             )
-          else
+          else ...[
+            if (profile.phones.length > 1)
+              DropdownButtonFormField<String>(
+                value: _selectedPhoneId ?? profile.defaultPhone.id,
+                decoration: InputDecoration(labelText: l10n.profileSelectPhone),
+                items: profile.phones
+                    .map(
+                      (p) => DropdownMenuItem(
+                        value: p.id,
+                        child: Text('${p.label}: ${p.number}'),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _busy ? null : (v) => setState(() => _selectedPhoneId = v),
+              )
+            else
+              _detailTile(l10n.phone, profile.defaultPhone.number),
+            SizedBox(height: AppSpacing.sm),
+            if (profile.addresses.length > 1)
+              DropdownButtonFormField<String>(
+                value: _selectedAddressId ?? profile.defaultAddress.id,
+                decoration: InputDecoration(labelText: l10n.profileSelectAddress),
+                items: profile.addresses
+                    .map(
+                      (a) => DropdownMenuItem(
+                        value: a.id,
+                        child: Text('${a.label} — ${a.district}'),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _busy ? null : (v) => setState(() => _selectedAddressId = v),
+              ),
             Material(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -235,17 +338,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Name: ${profile.name}'),
+                    Text('${l10n.labelName}: ${profile.name}'),
                     SizedBox(height: AppSpacing.xs),
-                    Text('Mobile: ${profile.mobile}'),
+                    Text('${l10n.profileDistrict}: ${_selectedAddress(profile)?.district ?? profile.district}'),
                     SizedBox(height: AppSpacing.xs),
-                    Text('District: ${profile.district}'),
-                    SizedBox(height: AppSpacing.xs),
-                    Text('Address Details: ${profile.addressDetails}'),
+                    Text(
+                      '${l10n.profileAddressDetails}: ${_selectedAddress(profile)?.addressDetails ?? profile.addressDetails}',
+                    ),
                   ],
                 ),
               ),
             ),
+          ],
           SizedBox(height: AppSpacing.md),
           Text('Order details', style: GoogleFonts.playfairDisplay(fontSize: 22)),
           SizedBox(height: AppSpacing.sm),
@@ -379,6 +483,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 : Text(l10n.confirmOrder),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _detailTile(String label, String value) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      child: ListTile(
+        title: Text(label),
+        subtitle: Text(value),
       ),
     );
   }

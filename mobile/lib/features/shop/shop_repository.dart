@@ -3,6 +3,7 @@ import '../../data/models/flash_offer.dart';
 import '../../data/models/order.dart';
 import '../../data/models/product.dart';
 import '../../core/app_constants.dart';
+import '../cart/cart_model.dart';
 
 class ShopRepository {
   ShopRepository(this._api);
@@ -45,9 +46,59 @@ class ShopRepository {
     return data.map((e) => Order.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+  Future<Order> fetchGuestOrder(String orderId, String phone) async {
+    final normalized = phone.replaceAll(RegExp(r'\s'), '');
+    final data = await _api.get(
+      '/api/orders/guest/$orderId',
+      query: {'phone': normalized},
+    ) as Map<String, dynamic>;
+    return Order.fromJson(data);
+  }
+
+  Future<Order> cancelGuestOrder(String orderId, String phone, {String? reason}) async {
+    final normalized = phone.replaceAll(RegExp(r'\s'), '');
+    final data = await _api.patch(
+      '/api/orders/guest/$orderId/cancel',
+      {
+        'phone': normalized,
+        if (reason != null && reason.isNotEmpty) 'reason': reason,
+      },
+    ) as Map<String, dynamic>;
+    return Order.fromJson(data);
+  }
+
+  Future<Order> cancelCustomerOrder(String orderId, {String? reason}) async {
+    final data = await _api.patch(
+      '/api/orders/$orderId/cancel',
+      {
+        if (reason != null && reason.isNotEmpty) 'reason': reason,
+      },
+      auth: true,
+    ) as Map<String, dynamic>;
+    return Order.fromJson(data);
+  }
+
   Future<Order> fetchOrder(String id) async {
     final data = await _api.get('/api/orders/$id', auth: true) as Map<String, dynamic>;
     return Order.fromJson(data);
+  }
+
+  /// Build cart lines from a past order using current catalog prices when possible.
+  Future<List<CartLine>> buildReorderLines(Order order) async {
+    final lines = <CartLine>[];
+    for (final item in order.items) {
+      final pid = item.productId;
+      if (pid == null || pid.isEmpty) continue;
+      try {
+        final product = await fetchProduct(pid);
+        final line = CartLine.fromOrderItem(item, product: product);
+        if (line != null) lines.add(line);
+      } catch (_) {
+        final line = CartLine.fromOrderItem(item);
+        if (line != null) lines.add(line);
+      }
+    }
+    return lines;
   }
 
   Future<Order> placeOrder({

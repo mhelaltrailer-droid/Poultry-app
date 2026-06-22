@@ -448,21 +448,6 @@ class _PhoneLoginPageState extends State<PhoneLoginPage>
                                   ),
                                 ),
                               ),
-                              SizedBox(height: AppSpacing.sm),
-                              _entrance(
-                                start: 0.58,
-                                end: 0.92,
-                                child: Text(
-                                  l10n.staffWelcomeHint,
-                                  textAlign: TextAlign.center,
-                                  textScaler: TextScaler.linear(textScale),
-                                  style: GoogleFonts.montserrat(
-                                    color: const Color(0xFF8B754A).withValues(alpha: 0.75),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         ),

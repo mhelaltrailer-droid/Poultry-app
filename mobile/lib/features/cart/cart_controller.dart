@@ -73,4 +73,22 @@ class CartController extends ChangeNotifier {
     notifyListeners();
     _persist();
   }
+
+  Future<void> replaceLines(List<CartLine> lines) async {
+    _lines.clear();
+    for (final line in lines) {
+      if (line.quantity <= 0) continue;
+      _lines[line.productId] = line.copyWith();
+    }
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> mergeLines(List<CartLine> lines) async {
+    for (final line in lines) {
+      if (line.quantity <= 0) continue;
+      add(line.copyWith());
+    }
+    await _persist();
+  }
 }

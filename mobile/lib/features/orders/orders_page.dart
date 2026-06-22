@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/app_theme.dart';
 import '../../core/l10n_context.dart';
 import '../../core/responsive/app_spacing.dart';
 import '../../core/l10n_formatters.dart';
 import '../../data/models/order.dart';
 import '../../widgets/app_skeleton.dart';
+import '../../widgets/order_status_tracker.dart';
 import '../auth/auth_controller.dart';
+import '../auth/customer_profile.dart';
 import '../auth/customer_profile_local_service.dart';
 import '../shop/shop_repository.dart';
+import 'order_detail_page.dart';
+import 'reorder_preview_page.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -21,17 +24,28 @@ class OrdersPage extends StatefulWidget {
 
 class _OrdersPageState extends State<OrdersPage> {
   final _profileService = CustomerProfileLocalService();
+  CustomerProfile? _savedProfile;
   Future<List<Order>>? _future;
 
   @override
   void initState() {
     super.initState();
+    _loadProfile();
     _future = _loadOrders();
+  }
+
+  Future<void> _loadProfile() async {
+    final profile = await _profileService.load();
+    if (!mounted) return;
+    setState(() => _savedProfile = profile);
   }
 
   Future<List<Order>> _loadOrders() async {
     final auth = context.read<AuthController>();
     final repo = context.read<ShopRepository>();
+    if (auth.isCustomerLoggedIn) {
+      return repo.fetchMyOrders();
+    }
     final profile = await _profileService.load();
     final phone = auth.guestPhone.trim().isNotEmpty
         ? auth.guestPhone.trim()
@@ -43,6 +57,32 @@ class _OrdersPageState extends State<OrdersPage> {
   Future<void> _refresh() async {
     setState(() => _future = _loadOrders());
     await _future;
+  }
+
+  void _openOrderDetail(Order order) {
+    final auth = context.read<AuthController>();
+    final phone = auth.guestPhone.trim().isNotEmpty
+        ? auth.guestPhone.trim()
+        : (_savedProfile?.defaultPhone.number ?? '');
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (_) => OrderDetailPage(
+              order: order,
+              ownerPhone: phone,
+              onOrderChanged: _refresh,
+            ),
+          ),
+        )
+        .then((_) => _refresh());
+  }
+
+  void _openReorder(Order order) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ReorderPreviewPage(order: order),
+      ),
+    );
   }
 
   @override
@@ -102,18 +142,52 @@ class _OrdersPageState extends State<OrdersPage> {
                     child: Material(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      child: ListTile(
-                        title: Text(
-                          o.orderNumber,
-                          style: GoogleFonts.montserrat(fontWeight: FontWeight.w700),
-                        ),
-                        subtitle: Text(
-                          localizedOrderStatus(l10n, o.status),
-                          style: TextStyle(color: AppTheme.goldDark),
-                        ),
-                        trailing: Text(
-                          o.total.toStringAsFixed(2),
-                          style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => _openOrderDetail(o),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.md,
+                            AppSpacing.sm,
+                            AppSpacing.xs,
+                            AppSpacing.sm,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      o.orderNumber,
+                                      style: GoogleFonts.montserrat(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    o.total.toStringAsFixed(2),
+                                    style: GoogleFonts.montserrat(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    tooltip: l10n.reorder,
+                                    icon: const Icon(Icons.replay_rounded),
+                                    onPressed: () => _openReorder(o),
+                                  ),
+                                ],
+                              ),
+                              if (Order.isTrackableActive(o.status)) ...[
+                                const SizedBox(height: 6),
+                                OrderStatusTracker(status: o.status, compact: true),
+                              ] else
+                                Text(
+                                  localizedOrderStatus(l10n, o.status),
+                                  style: const TextStyle(color: Color(0xFF8B754A)),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

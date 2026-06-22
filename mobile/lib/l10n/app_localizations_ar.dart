@@ -81,9 +81,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get phoneHint => '01111989094';
 
   @override
-  String get staffWelcomeHint => 'للطاقم: استخدم تسجيل الدخول.';
-
-  @override
   String get navShop => 'المتجر';
 
   @override
@@ -206,6 +203,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderStatusPending => 'قيد الانتظار';
 
   @override
+  String get orderStatusConfirmed => 'تم التأكيد';
+
+  @override
   String get orderStatusPreparing => 'قيد التجهيز';
 
   @override
@@ -225,7 +225,158 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ordersExplainer =>
-      'الطلبات المرتبطة بحساب مسجّل تظهر هنا عند تفعيل ذلك لاحقاً. تسوقك الحالي يتم بالكامل محلياً على هذا الجهاز.';
+      'الطلبات المرتبطة برقم هاتفك على هذا الجهاز. اضغط على أي طلب لمراجعته أو إعادة طلبه.';
+
+  @override
+  String get reorder => 'إعادة الطلب';
+
+  @override
+  String get reorderTitle => 'إعادة الطلب';
+
+  @override
+  String get reorderHint =>
+      'راجع أصناف هذا الطلب. عدّل الكميات ثم أضفها للسلة قبل إتمام الطلب.';
+
+  @override
+  String get reorderItemsTitle => 'الأصناف';
+
+  @override
+  String get reorderAddToCart => 'إضافة للسلة';
+
+  @override
+  String get reorderAddedToCart => 'تمت إضافة الأصناف للسلة';
+
+  @override
+  String get reorderEmpty => 'لا يمكن إضافة أصناف من هذا الطلب إلى السلة.';
+
+  @override
+  String reorderUnavailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count أصناف من هذا الطلب لم تعد متاحة.',
+      one: 'صنف واحد من هذا الطلب لم يعد متاحاً.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reorderPreviousSlot => 'موعد التوصيل السابق';
+
+  @override
+  String get reorderReplaceCartTitle => 'السلة ليست فارغة';
+
+  @override
+  String get reorderReplaceCartBody =>
+      'استبدال محتوى السلة الحالية أم إضافة هذه الأصناف إليها؟';
+
+  @override
+  String get reorderReplaceCart => 'استبدال السلة';
+
+  @override
+  String get reorderMergeCart => 'إضافة للسلة';
+
+  @override
+  String get orderDetailTitle => 'تفاصيل الطلب';
+
+  @override
+  String get orderDeliverySlot => 'موعد التوصيل';
+
+  @override
+  String get orderDeliveryAddress => 'العنوان';
+
+  @override
+  String get orderDeliveryFee => 'رسوم التوصيل';
+
+  @override
+  String get orderDiscount => 'الخصم';
+
+  @override
+  String get orderTotal => 'الإجمالي';
+
+  @override
+  String orderPlacedAt(String date) {
+    return 'تاريخ الطلب: $date';
+  }
+
+  @override
+  String get orderCancelTitle => 'إلغاء الطلب؟';
+
+  @override
+  String get orderCancelConfirm => 'هل أنت متأكد من إلغاء هذا الطلب؟';
+
+  @override
+  String get orderCancelAction => 'إلغاء الطلب';
+
+  @override
+  String get orderCancelledSnack => 'تم إلغاء الطلب';
+
+  @override
+  String get orderCancelReason => 'السبب';
+
+  @override
+  String get orderCancelSupportHint =>
+      'الطلب قيد التحضير بالفعل. للإلغاء يرجى التواصل مع الدعم عبر واتساب.';
+
+  @override
+  String get orderContactSupport => 'تواصل مع الدعم عبر واتساب';
+
+  @override
+  String orderSupportWhatsAppMessage(String orderNumber) {
+    return 'مرحباً، أحتاج مساعدة بخصوص طلبي $orderNumber.';
+  }
+
+  @override
+  String orderTrackerYouAreHere(String status) {
+    return 'الخطوة الحالية: $status';
+  }
+
+  @override
+  String get orderTrackerAutoRefresh => 'يتم تحديث الحالة تلقائياً كل 45 ثانية';
+
+  @override
+  String get profilePhonesTitle => 'أرقام الهاتف';
+
+  @override
+  String get profilePhonesHint => 'اختر الرقم الافتراضي المستخدم عند الدفع.';
+
+  @override
+  String get profileAddPhone => 'إضافة رقم هاتف';
+
+  @override
+  String get profilePhoneLabel => 'التسمية';
+
+  @override
+  String get profileAddressesTitle => 'العناوين';
+
+  @override
+  String get profileAddressesHint =>
+      'احفظ عناوين متعددة واختر واحداً عند الدفع.';
+
+  @override
+  String get profileAddAddress => 'إضافة عنوان';
+
+  @override
+  String get profileAddressLabel => 'تسمية العنوان';
+
+  @override
+  String get profileDistrict => 'المنطقة';
+
+  @override
+  String get profileAddressDetails => 'تفاصيل العنوان';
+
+  @override
+  String get profileSelectPhone => 'هاتف التوصيل';
+
+  @override
+  String get profileSelectAddress => 'عنوان التوصيل';
+
+  @override
+  String get profileEmptyHint => 'أكمل التسجيل أولاً لإدارة بيانات التواصل.';
+
+  @override
+  String get profileEmptyCheckoutHint =>
+      'لا توجد بيانات ملف شخصي. يرجى إكمال التسجيل أولاً.';
 
   @override
   String get lastOrderOnDevice => 'آخر طلب من هذا الجهاز';

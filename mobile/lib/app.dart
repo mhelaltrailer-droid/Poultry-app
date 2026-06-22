@@ -88,7 +88,7 @@ class _SessionGateState extends State<_SessionGate> {
                 playEntranceAnimation: true,
                 afterCinematicSplash: true,
               )
-            : auth.isStaff
+            : auth.isStaff && auth.canUseInAppDashboard
                 ? const AdminShell(key: ValueKey('admin-shell'))
                 : const MainShell(key: ValueKey('main-shell'));
 

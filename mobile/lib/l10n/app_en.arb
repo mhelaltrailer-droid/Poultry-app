@@ -28,7 +28,6 @@
   "phone": "Phone",
   "password": "Password",
   "phoneHint": "01111989094",
-  "staffWelcomeHint": "Staff: use Sign in.",
   "navShop": "Shop",
   "navCart": "Cart",
   "navOrders": "Orders",
@@ -89,13 +88,78 @@
   },
   "addressLabelHome": "Home",
   "orderStatusPending": "Pending",
+  "orderStatusConfirmed": "Confirmed",
   "orderStatusPreparing": "Preparing",
   "orderStatusOnTheWay": "On the way",
   "orderStatusDelivered": "Delivered",
   "orderStatusCancelled": "Cancelled",
   "ordersTitle": "Orders",
   "ordersHistoryTitle": "Order history",
-  "ordersExplainer": "Orders linked to a registered account will appear here when that is enabled. Your current shopping is stored locally on this device.",
+  "ordersExplainer": "Orders linked to your phone number on this device. Tap an order to review it or reorder.",
+  "reorder": "Reorder",
+  "reorderTitle": "Reorder",
+  "reorderHint": "Review items from this order. Adjust quantities, then add to your cart before checkout.",
+  "reorderItemsTitle": "Items",
+  "reorderAddToCart": "Add to cart",
+  "reorderAddedToCart": "Items added to cart",
+  "reorderEmpty": "No items from this order can be added to the cart.",
+  "reorderUnavailable": "{count, plural, =1{1 item from this order is no longer available.} other{{count} items from this order are no longer available.}}",
+  "@reorderUnavailable": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "reorderPreviousSlot": "Previous delivery slot",
+  "reorderReplaceCartTitle": "Cart is not empty",
+  "reorderReplaceCartBody": "Replace current cart items or add these items to what you already have?",
+  "reorderReplaceCart": "Replace cart",
+  "reorderMergeCart": "Add to cart",
+  "orderDetailTitle": "Order details",
+  "orderDeliverySlot": "Delivery slot",
+  "orderDeliveryAddress": "Address",
+  "orderDeliveryFee": "Delivery fee",
+  "orderDiscount": "Discount",
+  "orderTotal": "Total",
+  "orderPlacedAt": "Placed {date}",
+  "@orderPlacedAt": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "orderCancelTitle": "Cancel order?",
+  "orderCancelConfirm": "Are you sure you want to cancel this order?",
+  "orderCancelAction": "Cancel order",
+  "orderCancelledSnack": "Order cancelled",
+  "orderCancelReason": "Reason",
+  "orderCancelSupportHint": "This order is already being prepared. To cancel, please contact support via WhatsApp.",
+  "orderContactSupport": "Contact support on WhatsApp",
+  "orderSupportWhatsAppMessage": "Hello, I need help with my order {orderNumber}.",
+  "@orderSupportWhatsAppMessage": {
+    "placeholders": {
+      "orderNumber": {"type": "String"}
+    }
+  },
+  "orderTrackerYouAreHere": "Current step: {status}",
+  "@orderTrackerYouAreHere": {
+    "placeholders": {
+      "status": {"type": "String"}
+    }
+  },
+  "orderTrackerAutoRefresh": "Status updates automatically every 45 seconds",
+  "profilePhonesTitle": "Phone numbers",
+  "profilePhonesHint": "Choose the default number used at checkout.",
+  "profileAddPhone": "Add phone number",
+  "profilePhoneLabel": "Label",
+  "profileAddressesTitle": "Addresses",
+  "profileAddressesHint": "Save multiple addresses and pick one at checkout.",
+  "profileAddAddress": "Add address",
+  "profileAddressLabel": "Address label",
+  "profileDistrict": "District",
+  "profileAddressDetails": "Address details",
+  "profileSelectPhone": "Delivery phone",
+  "profileSelectAddress": "Delivery address",
+  "profileEmptyHint": "Complete sign-up first to manage your contact details.",
+  "profileEmptyCheckoutHint": "No profile data found. Please complete Sign Up first.",
   "lastOrderOnDevice": "Last order on this device",
   "profileTitle": "My profile",
   "contactSectionTitle": "Contact details",

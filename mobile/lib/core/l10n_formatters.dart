@@ -3,7 +3,7 @@ import '../l10n/app_localizations.dart';
 String localizedOrderStatus(AppLocalizations l, String status) {
   switch (status) {
     case 'confirmed':
-      return 'Confirmed';
+      return l.orderStatusConfirmed;
     case 'preparing':
       return l.orderStatusPreparing;
     case 'on_the_way':

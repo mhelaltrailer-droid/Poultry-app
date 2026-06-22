@@ -81,9 +81,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneHint => '01111989094';
 
   @override
-  String get staffWelcomeHint => 'Staff: use Sign in.';
-
-  @override
   String get navShop => 'Shop';
 
   @override
@@ -207,6 +204,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderStatusPending => 'Pending';
 
   @override
+  String get orderStatusConfirmed => 'Confirmed';
+
+  @override
   String get orderStatusPreparing => 'Preparing';
 
   @override
@@ -226,7 +226,162 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersExplainer =>
-      'Orders linked to a registered account will appear here when that is enabled. Your current shopping is stored locally on this device.';
+      'Orders linked to your phone number on this device. Tap an order to review it or reorder.';
+
+  @override
+  String get reorder => 'Reorder';
+
+  @override
+  String get reorderTitle => 'Reorder';
+
+  @override
+  String get reorderHint =>
+      'Review items from this order. Adjust quantities, then add to your cart before checkout.';
+
+  @override
+  String get reorderItemsTitle => 'Items';
+
+  @override
+  String get reorderAddToCart => 'Add to cart';
+
+  @override
+  String get reorderAddedToCart => 'Items added to cart';
+
+  @override
+  String get reorderEmpty =>
+      'No items from this order can be added to the cart.';
+
+  @override
+  String reorderUnavailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items from this order are no longer available.',
+      one: '1 item from this order is no longer available.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reorderPreviousSlot => 'Previous delivery slot';
+
+  @override
+  String get reorderReplaceCartTitle => 'Cart is not empty';
+
+  @override
+  String get reorderReplaceCartBody =>
+      'Replace current cart items or add these items to what you already have?';
+
+  @override
+  String get reorderReplaceCart => 'Replace cart';
+
+  @override
+  String get reorderMergeCart => 'Add to cart';
+
+  @override
+  String get orderDetailTitle => 'Order details';
+
+  @override
+  String get orderDeliverySlot => 'Delivery slot';
+
+  @override
+  String get orderDeliveryAddress => 'Address';
+
+  @override
+  String get orderDeliveryFee => 'Delivery fee';
+
+  @override
+  String get orderDiscount => 'Discount';
+
+  @override
+  String get orderTotal => 'Total';
+
+  @override
+  String orderPlacedAt(String date) {
+    return 'Placed $date';
+  }
+
+  @override
+  String get orderCancelTitle => 'Cancel order?';
+
+  @override
+  String get orderCancelConfirm =>
+      'Are you sure you want to cancel this order?';
+
+  @override
+  String get orderCancelAction => 'Cancel order';
+
+  @override
+  String get orderCancelledSnack => 'Order cancelled';
+
+  @override
+  String get orderCancelReason => 'Reason';
+
+  @override
+  String get orderCancelSupportHint =>
+      'This order is already being prepared. To cancel, please contact support via WhatsApp.';
+
+  @override
+  String get orderContactSupport => 'Contact support on WhatsApp';
+
+  @override
+  String orderSupportWhatsAppMessage(String orderNumber) {
+    return 'Hello, I need help with my order $orderNumber.';
+  }
+
+  @override
+  String orderTrackerYouAreHere(String status) {
+    return 'Current step: $status';
+  }
+
+  @override
+  String get orderTrackerAutoRefresh =>
+      'Status updates automatically every 45 seconds';
+
+  @override
+  String get profilePhonesTitle => 'Phone numbers';
+
+  @override
+  String get profilePhonesHint => 'Choose the default number used at checkout.';
+
+  @override
+  String get profileAddPhone => 'Add phone number';
+
+  @override
+  String get profilePhoneLabel => 'Label';
+
+  @override
+  String get profileAddressesTitle => 'Addresses';
+
+  @override
+  String get profileAddressesHint =>
+      'Save multiple addresses and pick one at checkout.';
+
+  @override
+  String get profileAddAddress => 'Add address';
+
+  @override
+  String get profileAddressLabel => 'Address label';
+
+  @override
+  String get profileDistrict => 'District';
+
+  @override
+  String get profileAddressDetails => 'Address details';
+
+  @override
+  String get profileSelectPhone => 'Delivery phone';
+
+  @override
+  String get profileSelectAddress => 'Delivery address';
+
+  @override
+  String get profileEmptyHint =>
+      'Complete sign-up first to manage your contact details.';
+
+  @override
+  String get profileEmptyCheckoutHint =>
+      'No profile data found. Please complete Sign Up first.';
 
   @override
   String get lastOrderOnDevice => 'Last order on this device';

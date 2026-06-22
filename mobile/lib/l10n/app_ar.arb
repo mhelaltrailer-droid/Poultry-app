@@ -28,7 +28,6 @@
   "phone": "رقم الهاتف",
   "password": "كلمة المرور",
   "phoneHint": "01111989094",
-  "staffWelcomeHint": "للطاقم: استخدم تسجيل الدخول.",
   "navShop": "المتجر",
   "navCart": "السلة",
   "navOrders": "الطلبات",
@@ -65,13 +64,78 @@
   "orderThankYou": "شكراً لك. رقم الطلب {orderNumber} — الحالة: {status}.\n\nلاحقاً يمكنك إنشاء حساب عند توفر التسجيل لحفظ طلباتك وبياناتك.",
   "addressLabelHome": "المنزل",
   "orderStatusPending": "قيد الانتظار",
+  "orderStatusConfirmed": "تم التأكيد",
   "orderStatusPreparing": "قيد التجهيز",
   "orderStatusOnTheWay": "في الطريق",
   "orderStatusDelivered": "تم التسليم",
   "orderStatusCancelled": "ملغى",
   "ordersTitle": "الطلبات",
   "ordersHistoryTitle": "سجل الطلبات",
-  "ordersExplainer": "الطلبات المرتبطة بحساب مسجّل تظهر هنا عند تفعيل ذلك لاحقاً. تسوقك الحالي يتم بالكامل محلياً على هذا الجهاز.",
+  "ordersExplainer": "الطلبات المرتبطة برقم هاتفك على هذا الجهاز. اضغط على أي طلب لمراجعته أو إعادة طلبه.",
+  "reorder": "إعادة الطلب",
+  "reorderTitle": "إعادة الطلب",
+  "reorderHint": "راجع أصناف هذا الطلب. عدّل الكميات ثم أضفها للسلة قبل إتمام الطلب.",
+  "reorderItemsTitle": "الأصناف",
+  "reorderAddToCart": "إضافة للسلة",
+  "reorderAddedToCart": "تمت إضافة الأصناف للسلة",
+  "reorderEmpty": "لا يمكن إضافة أصناف من هذا الطلب إلى السلة.",
+  "reorderUnavailable": "{count, plural, =1{صنف واحد من هذا الطلب لم يعد متاحاً.} other{{count} أصناف من هذا الطلب لم تعد متاحة.}}",
+  "@reorderUnavailable": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "reorderPreviousSlot": "موعد التوصيل السابق",
+  "reorderReplaceCartTitle": "السلة ليست فارغة",
+  "reorderReplaceCartBody": "استبدال محتوى السلة الحالية أم إضافة هذه الأصناف إليها؟",
+  "reorderReplaceCart": "استبدال السلة",
+  "reorderMergeCart": "إضافة للسلة",
+  "orderDetailTitle": "تفاصيل الطلب",
+  "orderDeliverySlot": "موعد التوصيل",
+  "orderDeliveryAddress": "العنوان",
+  "orderDeliveryFee": "رسوم التوصيل",
+  "orderDiscount": "الخصم",
+  "orderTotal": "الإجمالي",
+  "orderPlacedAt": "تاريخ الطلب: {date}",
+  "@orderPlacedAt": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "orderCancelTitle": "إلغاء الطلب؟",
+  "orderCancelConfirm": "هل أنت متأكد من إلغاء هذا الطلب؟",
+  "orderCancelAction": "إلغاء الطلب",
+  "orderCancelledSnack": "تم إلغاء الطلب",
+  "orderCancelReason": "السبب",
+  "orderCancelSupportHint": "الطلب قيد التحضير بالفعل. للإلغاء يرجى التواصل مع الدعم عبر واتساب.",
+  "orderContactSupport": "تواصل مع الدعم عبر واتساب",
+  "orderSupportWhatsAppMessage": "مرحباً، أحتاج مساعدة بخصوص طلبي {orderNumber}.",
+  "@orderSupportWhatsAppMessage": {
+    "placeholders": {
+      "orderNumber": {"type": "String"}
+    }
+  },
+  "orderTrackerYouAreHere": "الخطوة الحالية: {status}",
+  "@orderTrackerYouAreHere": {
+    "placeholders": {
+      "status": {"type": "String"}
+    }
+  },
+  "orderTrackerAutoRefresh": "يتم تحديث الحالة تلقائياً كل 45 ثانية",
+  "profilePhonesTitle": "أرقام الهاتف",
+  "profilePhonesHint": "اختر الرقم الافتراضي المستخدم عند الدفع.",
+  "profileAddPhone": "إضافة رقم هاتف",
+  "profilePhoneLabel": "التسمية",
+  "profileAddressesTitle": "العناوين",
+  "profileAddressesHint": "احفظ عناوين متعددة واختر واحداً عند الدفع.",
+  "profileAddAddress": "إضافة عنوان",
+  "profileAddressLabel": "تسمية العنوان",
+  "profileDistrict": "المنطقة",
+  "profileAddressDetails": "تفاصيل العنوان",
+  "profileSelectPhone": "هاتف التوصيل",
+  "profileSelectAddress": "عنوان التوصيل",
+  "profileEmptyHint": "أكمل التسجيل أولاً لإدارة بيانات التواصل.",
+  "profileEmptyCheckoutHint": "لا توجد بيانات ملف شخصي. يرجى إكمال التسجيل أولاً.",
   "lastOrderOnDevice": "آخر طلب من هذا الجهاز",
   "profileTitle": "حسابي",
   "contactSectionTitle": "بيانات التواصل",

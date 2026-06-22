@@ -14,6 +14,7 @@ const String userTypeStaff = 'staff';
 const _kLegacyToken = 'customer_jwt';
 const _kLegacyUser = 'customer_user';
 
+const _kCustomerToken = 'daytoday_customer_jwt';
 const _kStaffToken = 'daytoday_staff_jwt';
 const _kStaffUser = 'daytoday_staff_user';
 const _kShopping = 'daytoday_shopping_active';
@@ -28,6 +29,7 @@ const _staffRoles = {'admin', 'app_admin', 'ops_admin'};
 
 class AuthController extends ChangeNotifier {
   String? _staffToken;
+  String? _customerToken;
   Map<String, dynamic>? _staffUser;
   bool _shoppingActive = false;
   String _guestName = '';
@@ -42,6 +44,9 @@ class AuthController extends ChangeNotifier {
   bool get onWelcome => !isStaff && !isShopping;
 
   String? get staffToken => _staffToken;
+  String? get customerToken => _customerToken;
+  bool get isCustomerLoggedIn =>
+      _customerToken != null && _customerToken!.isNotEmpty;
   Map<String, dynamic>? get staffUser => _staffUser;
   String get guestName => _guestName;
   String get guestPhone => _guestPhone;
@@ -70,13 +75,17 @@ class AuthController extends ChangeNotifier {
     return r == 'admin' || r == 'app_admin';
   }
 
-  Future<String?> getToken() async => _staffToken;
+  Future<String?> getToken() async {
+    if (_staffToken != null && _staffToken!.isNotEmpty) return _staffToken;
+    return _customerToken;
+  }
 
   Future<void> loadSession() async {
     final p = await SharedPreferences.getInstance();
     await _migrateLegacy(p);
 
     _staffToken = p.getString(_kStaffToken);
+    _customerToken = p.getString(_kCustomerToken);
     final staffRaw = p.getString(_kStaffUser);
     _staffUser = null;
     if (staffRaw != null) {
@@ -88,6 +97,9 @@ class AuthController extends ChangeNotifier {
     }
     if (_staffToken == null || _staffToken!.isEmpty) {
       _staffUser = null;
+    }
+    if (_customerToken == null || _customerToken!.isEmpty) {
+      _customerToken = null;
     }
 
     _shoppingActive = p.getBool(_kShopping) ?? false;
@@ -121,6 +133,15 @@ class AuthController extends ChangeNotifier {
     } catch (_) {}
     await p.remove(_kLegacyToken);
     await p.remove(_kLegacyUser);
+  }
+
+  Future<void> _persistCustomer() async {
+    final p = await SharedPreferences.getInstance();
+    if (_customerToken != null && _customerToken!.isNotEmpty) {
+      await p.setString(_kCustomerToken, _customerToken!);
+    } else {
+      await p.remove(_kCustomerToken);
+    }
   }
 
   Future<void> _persistStaff() async {
@@ -162,9 +183,16 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setGuestContact({required String name, required String phone}) async {
+  Future<void> setGuestContact({
+    required String name,
+    required String phone,
+    String? district,
+    String? addressDetail,
+  }) async {
     _guestName = name.trim();
     _guestPhone = phone.trim();
+    if (district != null) _guestDistrict = district.trim();
+    if (addressDetail != null) _guestAddressDetail = addressDetail.trim();
     await _persistShopping();
     notifyListeners();
   }
@@ -215,10 +243,17 @@ class AuthController extends ChangeNotifier {
     final role = user?['role'] as String? ?? '';
 
     if (_staffRoles.contains(role)) {
+      if (role == 'ops_admin') {
+        throw Exception(
+          'حساب العمليات متاح من لوحة الويب فقط.\nOperations account is web dashboard only.',
+        );
+      }
       _staffToken = token;
       _staffUser = user;
+      _customerToken = null;
       _shoppingActive = false;
       await _persistStaff();
+      await _persistCustomer();
       await _persistShopping();
       notifyListeners();
       return;
@@ -227,7 +262,9 @@ class AuthController extends ChangeNotifier {
     if (role == 'customer') {
       _staffToken = null;
       _staffUser = null;
+      _customerToken = token;
       await _persistStaff();
+      await _persistCustomer();
       _shoppingActive = true;
       _guestName = user?['name']?.toString() ?? '';
       _guestPhone = user?['phone']?.toString() ?? phone.replaceAll(RegExp(r'\s'), '');
@@ -314,9 +351,12 @@ class AuthController extends ChangeNotifier {
       );
     }
     final user = data['user'] as Map<String, dynamic>?;
+    final token = data['token'] as String?;
     _staffToken = null;
     _staffUser = null;
+    _customerToken = token;
     await _persistStaff();
+    await _persistCustomer();
     _shoppingActive = true;
     _guestName = user?['name']?.toString() ?? name.trim();
     _guestPhone = user?['phone']?.toString() ?? phone.replaceAll(RegExp(r'\s'), '');
@@ -335,6 +375,7 @@ class AuthController extends ChangeNotifier {
     final p = await SharedPreferences.getInstance();
     _staffToken = null;
     _staffUser = null;
+    _customerToken = null;
     _shoppingActive = false;
     _guestName = '';
     _guestPhone = '';
@@ -342,6 +383,7 @@ class AuthController extends ChangeNotifier {
     _guestAddressDetail = '';
     await p.remove(_kStaffToken);
     await p.remove(_kStaffUser);
+    await p.remove(_kCustomerToken);
     await p.remove(_kShopping);
     await p.remove(_kGuestName);
     await p.remove(_kGuestPhone);

@@ -236,12 +236,6 @@ abstract class AppLocalizations {
   /// **'01111989094'**
   String get phoneHint;
 
-  /// No description provided for @staffWelcomeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Staff: use Sign in.'**
-  String get staffWelcomeHint;
-
   /// No description provided for @navShop.
   ///
   /// In en, this message translates to:
@@ -458,6 +452,12 @@ abstract class AppLocalizations {
   /// **'Pending'**
   String get orderStatusPending;
 
+  /// No description provided for @orderStatusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get orderStatusConfirmed;
+
   /// No description provided for @orderStatusPreparing.
   ///
   /// In en, this message translates to:
@@ -497,8 +497,272 @@ abstract class AppLocalizations {
   /// No description provided for @ordersExplainer.
   ///
   /// In en, this message translates to:
-  /// **'Orders linked to a registered account will appear here when that is enabled. Your current shopping is stored locally on this device.'**
+  /// **'Orders linked to your phone number on this device. Tap an order to review it or reorder.'**
   String get ordersExplainer;
+
+  /// No description provided for @reorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder'**
+  String get reorder;
+
+  /// No description provided for @reorderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder'**
+  String get reorderTitle;
+
+  /// No description provided for @reorderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Review items from this order. Adjust quantities, then add to your cart before checkout.'**
+  String get reorderHint;
+
+  /// No description provided for @reorderItemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get reorderItemsTitle;
+
+  /// No description provided for @reorderAddToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cart'**
+  String get reorderAddToCart;
+
+  /// No description provided for @reorderAddedToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Items added to cart'**
+  String get reorderAddedToCart;
+
+  /// No description provided for @reorderEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No items from this order can be added to the cart.'**
+  String get reorderEmpty;
+
+  /// No description provided for @reorderUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item from this order is no longer available.} other{{count} items from this order are no longer available.}}'**
+  String reorderUnavailable(int count);
+
+  /// No description provided for @reorderPreviousSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous delivery slot'**
+  String get reorderPreviousSlot;
+
+  /// No description provided for @reorderReplaceCartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart is not empty'**
+  String get reorderReplaceCartTitle;
+
+  /// No description provided for @reorderReplaceCartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace current cart items or add these items to what you already have?'**
+  String get reorderReplaceCartBody;
+
+  /// No description provided for @reorderReplaceCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace cart'**
+  String get reorderReplaceCart;
+
+  /// No description provided for @reorderMergeCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cart'**
+  String get reorderMergeCart;
+
+  /// No description provided for @orderDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order details'**
+  String get orderDetailTitle;
+
+  /// No description provided for @orderDeliverySlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery slot'**
+  String get orderDeliverySlot;
+
+  /// No description provided for @orderDeliveryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get orderDeliveryAddress;
+
+  /// No description provided for @orderDeliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee'**
+  String get orderDeliveryFee;
+
+  /// No description provided for @orderDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get orderDiscount;
+
+  /// No description provided for @orderTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get orderTotal;
+
+  /// No description provided for @orderPlacedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Placed {date}'**
+  String orderPlacedAt(String date);
+
+  /// No description provided for @orderCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel order?'**
+  String get orderCancelTitle;
+
+  /// No description provided for @orderCancelConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this order?'**
+  String get orderCancelConfirm;
+
+  /// No description provided for @orderCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel order'**
+  String get orderCancelAction;
+
+  /// No description provided for @orderCancelledSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled'**
+  String get orderCancelledSnack;
+
+  /// No description provided for @orderCancelReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get orderCancelReason;
+
+  /// No description provided for @orderCancelSupportHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is already being prepared. To cancel, please contact support via WhatsApp.'**
+  String get orderCancelSupportHint;
+
+  /// No description provided for @orderContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support on WhatsApp'**
+  String get orderContactSupport;
+
+  /// No description provided for @orderSupportWhatsAppMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, I need help with my order {orderNumber}.'**
+  String orderSupportWhatsAppMessage(String orderNumber);
+
+  /// No description provided for @orderTrackerYouAreHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Current step: {status}'**
+  String orderTrackerYouAreHere(String status);
+
+  /// No description provided for @orderTrackerAutoRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Status updates automatically every 45 seconds'**
+  String get orderTrackerAutoRefresh;
+
+  /// No description provided for @profilePhonesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone numbers'**
+  String get profilePhonesTitle;
+
+  /// No description provided for @profilePhonesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the default number used at checkout.'**
+  String get profilePhonesHint;
+
+  /// No description provided for @profileAddPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Add phone number'**
+  String get profileAddPhone;
+
+  /// No description provided for @profilePhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get profilePhoneLabel;
+
+  /// No description provided for @profileAddressesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Addresses'**
+  String get profileAddressesTitle;
+
+  /// No description provided for @profileAddressesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Save multiple addresses and pick one at checkout.'**
+  String get profileAddressesHint;
+
+  /// No description provided for @profileAddAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add address'**
+  String get profileAddAddress;
+
+  /// No description provided for @profileAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address label'**
+  String get profileAddressLabel;
+
+  /// No description provided for @profileDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get profileDistrict;
+
+  /// No description provided for @profileAddressDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Address details'**
+  String get profileAddressDetails;
+
+  /// No description provided for @profileSelectPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery phone'**
+  String get profileSelectPhone;
+
+  /// No description provided for @profileSelectAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery address'**
+  String get profileSelectAddress;
+
+  /// No description provided for @profileEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete sign-up first to manage your contact details.'**
+  String get profileEmptyHint;
+
+  /// No description provided for @profileEmptyCheckoutHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No profile data found. Please complete Sign Up first.'**
+  String get profileEmptyCheckoutHint;
 
   /// No description provided for @lastOrderOnDevice.
   ///

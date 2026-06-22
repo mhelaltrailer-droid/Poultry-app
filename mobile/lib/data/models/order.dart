@@ -49,6 +49,7 @@ class Order {
     this.deliveryAddress,
     this.deliverySlotLabel,
     this.deliverySlotId,
+    this.cancellationReason,
   });
 
   final String id;
@@ -64,6 +65,7 @@ class Order {
   final Map<String, dynamic>? deliveryAddress;
   final String? deliverySlotLabel;
   final String? deliverySlotId;
+  final String? cancellationReason;
 
   factory Order.fromJson(Map<String, dynamic> j) {
     final itemsRaw = j['items'] as List<dynamic>? ?? [];
@@ -87,8 +89,15 @@ class Order {
       deliverySlotId: (j['deliverySlot'] is Map)
           ? (j['deliverySlot']['id'] as String?)
           : null,
+      cancellationReason: j['cancellationReason'] as String?,
     );
   }
+
+  static bool canCustomerCancel(String status) =>
+      status == 'pending' || status == 'confirmed';
+
+  static bool isTrackableActive(String status) =>
+      status != 'delivered' && status != 'cancelled';
 
   static String statusLabel(String s) {
     switch (s) {

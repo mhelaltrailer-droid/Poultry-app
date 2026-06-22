@@ -62,7 +62,9 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
     final useRail = w >= AppBreakpoints.railCompact;
     final extended = w >= AppBreakpoints.railExtended;
     final showAccountTabs =
-        auth.guestName.trim().isNotEmpty || auth.guestPhone.trim().isNotEmpty;
+        auth.isCustomerLoggedIn ||
+        auth.guestName.trim().isNotEmpty ||
+        auth.guestPhone.trim().isNotEmpty;
 
     final pages = <Widget>[
       const ShopHomePage(),

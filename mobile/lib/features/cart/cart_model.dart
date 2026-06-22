@@ -1,4 +1,5 @@
 import '../../data/models/product.dart';
+import '../../data/models/order.dart';
 
 class CartLine {
   CartLine({
@@ -33,6 +34,35 @@ class CartLine {
       quantity: quantity,
       image: p.images.isNotEmpty ? p.images.first : null,
       weightLabel: p.weightLabel,
+    );
+  }
+
+  static CartLine? fromOrderItem(OrderItem item, {Product? product, int? quantity}) {
+    final productId = item.productId;
+    if (productId == null || productId.isEmpty) return null;
+    if (product != null) {
+      return CartLine.fromProduct(product, quantity: quantity ?? item.quantity);
+    }
+    return CartLine(
+      productId: productId,
+      name: item.name,
+      price: item.price,
+      quantity: quantity ?? item.quantity,
+      image: item.image,
+      weightLabel: item.weightSnapshot,
+    );
+  }
+
+  CartLine copyWith({int? quantity}) {
+    return CartLine(
+      productId: productId,
+      name: name,
+      nameEn: nameEn,
+      nameAr: nameAr,
+      price: price,
+      quantity: quantity ?? this.quantity,
+      image: image,
+      weightLabel: weightLabel,
     );
   }
 

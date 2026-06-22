@@ -177,6 +177,25 @@ class _SignUpPageState extends State<SignUpPage> {
       district: district,
       addressDetails: _addressDetailsCtrl.text.trim(),
       deliveryNotes: _notesCtrl.text.trim(),
+      phones: [
+        SavedPhone(
+          id: SavedPhone.newId(),
+          label: 'Mobile',
+          number: _mobileCtrl.text.trim(),
+          isDefault: true,
+        ),
+      ],
+      addresses: [
+        SavedAddress(
+          id: SavedAddress.newId(),
+          label: 'Home',
+          city: _fixedCity,
+          district: district,
+          addressDetails: _addressDetailsCtrl.text.trim(),
+          deliveryNotes: _notesCtrl.text.trim(),
+          isDefault: true,
+        ),
+      ],
     );
     try {
       await context.read<AuthController>().registerCustomer(
